@@ -1,0 +1,8 @@
+name: WhatToEat
+targets:
+  WhatToEat:
+    type: application
+    platform: iOS
+    deploymentTarget: "18.0"
+    sources:
+      - path: "src"
