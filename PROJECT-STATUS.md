@@ -14,6 +14,7 @@
 | DESIGN-SPEC.md (主控版) | `what-to-eat/docs/DESIGN-SPEC.md` | ✅ 完成 |
 | DESIGN-SPEC-what-to-eat-v1.md (UI版) | `what-to-eat/docs/DESIGN-SPEC-what-to-eat-v1.md` | ✅ 完成 |
 | CHANGELOG.md | `what-to-eat/CHANGELOG.md` | ✅ 完成 |
+| TECH-DESIGN-backend.md (后端技术方案) | `what-to-eat/docs/TECH-DESIGN-backend.md` | ✅ 完成 |
 
 ## 各岗位进度
 | 岗位 | 任务 | 状态 | 阻塞 |
@@ -21,7 +22,8 @@
 | 主控 | 需求决策 + 规范输出 | ✅ 完成 | 无 |
 | UI (小艺) | 3个Tab完整设计稿 | 🔄 进行中 | 无 |
 | 客户端 (小前) | 项目初始化 + AI接口 | ✅ 完成 | 无 |
-| 后端 | Cloudflare AI配置 | ⏳ 待启动 | 等待客户端 |
+| 后端 | Cloudflare AI配置 | ✅ 完成核心代码 | 等待凭证 |
+| 后端 | API对齐 | 🔄 进行中 | 等待client-dev确认 |
 | 测试 (小测) | 测试用例 | ⏳ 未开始 | 等待开发 |
 
 ## 技术决策（已确认）
