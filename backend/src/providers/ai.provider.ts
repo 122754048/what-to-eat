@@ -15,26 +15,11 @@ const FALLBACK_RECOMMENDATIONS = [
 ];
 
 /**
- * 生成AI推荐理由（调用Llama 3.1）
+ * 生成推荐理由
+ * 注意：V1版本使用预置文案，由前端AI（Cloudflare AI）根据心情/健康目标选择菜系，
+ * 后端只负责返回具体菜品，不调用AI。
+ * 后续版本可扩展为调用Workers AI生成个性化推荐。
  */
-export async function generateAIRecommendation(dishName: string): Promise<string> {
-  const prompt = `你是一个热情的美食推荐助手。请为"${dishName}"生成一段50字以内的推荐理由，语气友好活泼，突出菜品特点。`;
-
-  try {
-    const response = await AI.run('@cf/meta/llama-3-8b-instruct', {
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 100,
-      temperature: 0.8,
-    }) as { response?: string };
-
-    if (response?.response) {
-      // 清理AI输出，去除引号和多余空白
-      return response.response.trim().replace(/^[""]|[""]$/g, '');
-    }
-  } catch (err) {
-    console.error('[AI] 生成推荐失败:', err);
-  }
-
-  // 降级：随机返回预置文案
+export async function generateAIRecommendation(_dishName: string): Promise<string> {
   return FALLBACK_RECOMMENDATIONS[Math.floor(Math.random() * FALLBACK_RECOMMENDATIONS.length)];
 }
