@@ -5,15 +5,14 @@ enum Design {
     // Colors
     enum Colors {
         static let primary = Color(hex: "#7CB97D")       // 鼠尾草绿
-        static let accent = Color(hex: "#F4A261")        // 暖橙色
-        static let background = Color(hex: "#FFFFFF")    // 纯白背景
-        static let cardBackground = Color(hex: "#F8F8F8") // 极淡灰卡片
-        static let primaryText = Color(hex: "#2D2D2D")   // 深灰黑
-        static let secondaryText = Color(hex: "#8E8E93")  // 次级灰
-        static let border = Color(hex: "#E8E8E8")         // 边框灰
+        static let accent = Color(hex: "#F4A261")      // 暖橙色
+        static let background = Color(hex: "#FFFFFF")   // 纯白背景
+        static let cardBackground = Color(hex: "#F8F8F8")
+        static let primaryText = Color(hex: "#2D2D2D")
+        static let secondaryText = Color(hex: "#8E8E93")
+        static let border = Color(hex: "#E8E8E8")
     }
 
-    // Spacing
     enum Spacing {
         static let screenPadding: CGFloat = 20
         static let cardPadding: CGFloat = 16
@@ -23,7 +22,6 @@ enum Design {
         static let standard: CGFloat = 12
     }
 
-    // Corner Radius
     enum CornerRadius {
         static let card: CGFloat = 20
         static let button: CGFloat = 12
@@ -39,11 +37,11 @@ extension Color {
         Scanner(string: hex).scanHexInt64(&int)
         let a, r, g, b: UInt64
         switch hex.count {
-        case 3: // RGB (12-bit)
+        case 3:
             (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
-        case 6: // RGB (24-bit)
+        case 6:
             (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
-        case 8: // ARGB (32-bit)
+        case 8:
             (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
         default:
             (a, r, g, b) = (255, 0, 0, 0)
@@ -60,13 +58,11 @@ extension Color {
 
 // MARK: - Home View
 struct HomeView: View {
-    @State private var selectedMood: String? = nil
+    @State private var selectedCuisineId: String? = nil
     @State private var isShowingResult = false
     @State private var recommendedDish: Dish?
     @State private var isLoading = false
     @State private var errorMessage: String?
-
-    private let moods = ["辣", "清淡", "肉食", "素食", "随便"]
 
     var body: some View {
         NavigationStack {
@@ -83,28 +79,16 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.top, Design.Spacing.screenPadding)
 
-                    // Mood Picker
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: Design.Spacing.standard) {
-                            ForEach(moods, id: \.self) { mood in
-                                MoodButton(
-                                    title: mood,
-                                    isSelected: selectedMood == mood
-                                ) {
-                                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                                        selectedMood = mood
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.horizontal, Design.Spacing.screenPadding)
-                    }
+                    Text("随机一道美食，开启美味之旅")
+                        .font(.subheadline)
+                        .foregroundColor(Design.Colors.secondaryText)
+                        .frame(maxWidth: .infinity, alignment: .leading)
 
                     Spacer()
 
                     // Decision Button
                     Button {
-                        triggerDecision()
+                        triggerRandomDecision()
                     } label: {
                         ZStack {
                             Circle()
@@ -133,21 +117,29 @@ struct HomeView: View {
             .navigationBarHidden(true)
             .sheet(isPresented: $isShowingResult) {
                 if let dish = recommendedDish {
-                    DishResultSheet(dish: dish, onDismiss: {
+                    DishResultSheet(dish: dish) {
                         isShowingResult = false
-                    })
+                    }
                 }
             }
         }
     }
 
-    private func triggerDecision() {
+    private func triggerRandomDecision() {
         isLoading = true
         errorMessage = nil
 
         Task {
             do {
-                let dish = try await AIService.shared.decide(mood: selectedMood ?? "随便")
+                // V1: Random cuisine recommendation
+                // TODO: In future, pick a random cuisineId first, or let user pick
+                // For now, we need at least one cuisine to call recommend
+                let cuisines = try await APIService.shared.getCuisines()
+                guard let randomCuisine = cuisines.randomElement() else {
+                    throw APIError.serverError(code: 50001, message: "暂无菜系数据")
+                }
+
+                let dish = try await APIService.shared.recommendDish(cuisineId: randomCuisine.id)
                 await MainActor.run {
                     recommendedDish = dish
                     isLoading = false
@@ -160,33 +152,6 @@ struct HomeView: View {
                 }
             }
         }
-    }
-}
-
-// MARK: - Mood Button
-struct MoodButton: View {
-    let title: String
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            Text(title)
-                .font(.body)
-                .fontWeight(.medium)
-                .foregroundColor(isSelected ? .white : Design.Colors.primaryText)
-                .padding(.horizontal, Design.Spacing.cardPadding)
-                .padding(.vertical, Design.Spacing.standard)
-                .background(
-                    Capsule()
-                        .fill(isSelected ? Design.Colors.primary : Design.Colors.cardBackground)
-                )
-                .overlay(
-                    Capsule()
-                        .stroke(isSelected ? Color.clear : Design.Colors.border, lineWidth: 1)
-                )
-        }
-        .buttonStyle(ScaleButtonStyle())
     }
 }
 
