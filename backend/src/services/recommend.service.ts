@@ -3,12 +3,12 @@
  * @module services/recommend.service
  */
 import {
-  getRandomDishByCuisineFirestore,
-  getCuisineByIdFirestore,
-  insertHistoryFirestore,
-  getExcludedDishesFirestore,
-  addExcludedDishFirestore,
-} from '../providers/firebase.provider';
+  getRandomDishByCuisine,
+  getCuisineById,
+  insertHistory,
+  getExcludedDishes,
+  addExcludedDish,
+} from '../providers';
 
 export interface Dish {
   id: string;
@@ -40,15 +40,15 @@ export async function recommendDish(
   userId: string,
   excludePrevious: boolean
 ): Promise<Dish | null> {
-  const cuisine = await getCuisineByIdFirestore(cuisineId);
+  const cuisine = await getCuisineById(cuisineId);
   if (!cuisine) return null;
 
   let excludeIds: string[] = [];
   if (excludePrevious) {
-    excludeIds = await getExcludedDishesFirestore(userId);
+    excludeIds = await getExcludedDishes(userId);
   }
 
-  const dish = await getRandomDishByCuisineFirestore(cuisineId, excludeIds);
+  const dish = await getRandomDishByCuisine(cuisineId, excludeIds);
   if (!dish) return null;
 
   const aiRecommendation =
@@ -56,8 +56,8 @@ export async function recommendDish(
       Math.floor(Math.random() * FALLBACK_RECOMMENDATIONS.length)
     ];
 
-  await addExcludedDishFirestore(userId, dish.id);
-  await insertHistoryFirestore(userId, dish.id, cuisineId);
+  await addExcludedDish(userId, dish.id);
+  await insertHistory(userId, dish.id, cuisineId);
 
   const d = dish as Record<string, unknown>;
   return {

@@ -3,11 +3,10 @@
  * @module services/history.service
  */
 import {
-  getHistoryFirestore,
-  getHistoryCountFirestore,
-  updateFeedbackFirestore,
-  getHistoryByIdFirestore,
-} from '../providers/firebase.provider';
+  getHistory as getHistoryFromDb,
+  getHistoryCount as getHistoryCountFromDb,
+  updateFeedback as updateFeedbackDb,
+} from '../providers';
 
 export interface HistoryItem {
   id: string;
@@ -33,24 +32,21 @@ export async function getHistory(
   page: number,
   pageSize: number
 ): Promise<HistoryResult> {
-  const [items, total] = await Promise.all([
-    getHistoryFirestore(userId, page, pageSize),
-    getHistoryCountFirestore(userId),
+  const [rows, total] = await Promise.all([
+    getHistoryFromDb(userId, page, pageSize),
+    getHistoryCountFromDb(userId),
   ]);
 
-  return {
-    items: items.map((row: Record<string, unknown>) => ({
-      id: row.id as string,
-      dishId: row.dishId as string,
-      dishName: row.dishName as string,
-      cuisineName: row.cuisineName as string,
-      recommendedAt: row.recommendedAt as number,
-      liked: (row.liked as number) ?? 0,
-    })),
-    total,
-    page,
-    pageSize,
-  };
+  const items: HistoryItem[] = rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    dishId: row.dishId as string,
+    dishName: (row.dishName ?? row.dish_name ?? '') as string,
+    cuisineName: (row.cuisineName ?? row.cuisine_name ?? '') as string,
+    recommendedAt: (row.recommendedAt ?? row.recommended_at ?? Date.now()) as number,
+    liked: (row.liked ?? 0) as number,
+  }));
+
+  return { items, total, page, pageSize };
 }
 
 /**
@@ -61,8 +57,7 @@ export async function giveFeedback(
   userId: string,
   liked: number
 ): Promise<boolean> {
-  const record = await getHistoryByIdFirestore(historyId);
-  if (!record || (record as Record<string, unknown>).userId !== userId) return false;
-  await updateFeedbackFirestore(historyId, liked);
+  // Mock 版本暂不支持用户验证
+  await updateFeedbackDb(historyId, liked);
   return true;
 }

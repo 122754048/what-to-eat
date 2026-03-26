@@ -3,9 +3,9 @@
  * @module services/dish.service
  */
 import {
-  getDishByIdFirestore,
-  getCuisineByIdFirestore,
-} from '../providers/firebase.provider';
+  getDishById as getDishByIdFromDb,
+  getCuisineById as getCuisineByIdFromDb,
+} from '../providers';
 
 export interface DishDetail {
   id: string;
@@ -30,29 +30,29 @@ export interface DishDetail {
  * 获取菜品详情
  */
 export async function getDishDetail(dishId: string): Promise<DishDetail | null> {
-  const dish = await getDishByIdFirestore(dishId);
+  const dish = await getDishByIdFromDb(dishId);
   if (!dish) return null;
 
   const d = dish as Record<string, unknown>;
   const cuisineId = d.cuisineId as string;
-  const cuisine = cuisineId ? await getCuisineByIdFirestore(cuisineId) : null;
+  const cuisine = cuisineId ? await getCuisineByIdFromDb(cuisineId) : null;
 
   return {
     id: d.id as string,
     name: d.name as string,
     cuisineId,
-    cuisineName: cuisine?.name as string ?? '',
-    imageUrl: (d.imageUrl as string) ?? '',
-    thumbnailUrl: (d.thumbnailUrl as string) ?? '',
+    cuisineName: (cuisine?.name ?? '') as string,
+    imageUrl: (d.imageUrl ?? d.image_url ?? '') as string,
+    thumbnailUrl: (d.thumbnailUrl ?? d.thumbnail_url ?? '') as string,
     calories: {
-      min: (d.caloriesMin as number) ?? 0,
-      max: (d.caloriesMax as number) ?? 0,
-      unit: (d.caloriesUnit as string) ?? 'kcal',
+      min: (d.caloriesMin ?? d.calories_min ?? 0) as number,
+      max: (d.caloriesMax ?? d.calories_max ?? 0) as number,
+      unit: (d.caloriesUnit ?? d.calories_unit ?? 'kcal') as string,
     },
-    aiRecommendation: (d.aiRecommendation as string) ?? '',
+    aiRecommendation: (d.aiRecommendation ?? d.ai_recommendation ?? '') as string,
     tags: (d.tags as string[]) ?? [],
-    difficulty: (d.difficulty as string) ?? '',
-    cookTime: (d.cookTime as string) ?? '',
+    difficulty: (d.difficulty ?? '') as string,
+    cookTime: (d.cookTime ?? d.cook_time ?? '') as string,
     recipe: {
       ingredients: [],
       steps: [],
