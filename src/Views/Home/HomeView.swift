@@ -123,6 +123,7 @@ struct SwipeCardContainer: View {
     @State private var selectedDish: Dish?
     @State private var showFilter = false
     @State private var selectedFilters: Set<DietFilter> = []
+    @State private var showPaywall = false
 
     var body: some View {
         ZStack {
@@ -151,6 +152,9 @@ struct SwipeCardContainer: View {
             if let dish = selectedDish {
                 DishDetailSheet(dish: dish)
             }
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView()
         }
     }
 
@@ -349,6 +353,13 @@ struct SwipeCardContainer: View {
 
     private func swipeCurrentCard(direction: SwipeDirection) {
         guard currentIndex < dishes.count else { return }
+
+        // Check subscription swipe limit
+        if !SubscriptionManager.shared.checkSwipe() {
+            showPaywall = true
+            return
+        }
+
         let dish = dishes[currentIndex]
         handleSwipe(dish, direction: direction)
     }
