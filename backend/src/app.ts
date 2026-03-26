@@ -7,6 +7,7 @@ import { cuisinesRouter } from './routes/cuisines';
 import { recommendRouter } from './routes/recommend';
 import { dishesRouter } from './routes/dishes';
 import { historyRouter } from './routes/history';
+import { aiRouter } from './routes/ai';
 
 export const app = new Hono();
 
@@ -15,6 +16,7 @@ app.route('/api/v1/cuisines', cuisinesRouter);
 app.route('/api/v1', recommendRouter);
 app.route('/api/v1', dishesRouter);
 app.route('/api/v1', historyRouter);
+app.route('/api/v1', aiRouter);
 
 // 健康检查
 app.get('/health', (c) => c.json({ status: 'ok', timestamp: Date.now() }));
