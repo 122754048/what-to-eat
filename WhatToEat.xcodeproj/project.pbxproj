@@ -13,6 +13,7 @@
 		41B050909369958EC507F1BC /* Constants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AA24BC4004470F2393B2534 /* Constants.swift */; };
 		51A844ECD6A8616CF6284928 /* Dish.swift in Sources */ = {isa = PBXBuildFile; fileRef = D130CC27A701FA7B283E5E50 /* Dish.swift */; };
 		675A8941BCF8A44628188DBE /* MockAPIService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D46272F771562B4B4CC2CC9C /* MockAPIService.swift */; };
+		7F37BDBEC381D7F63AF31002 /* SwipeCardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C38C09EB728F3FEC89D9366C /* SwipeCardView.swift */; };
 		803B584772F9FCA44FDF6DAC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = EA56450FAAE1A7175E2FE613 /* LaunchScreen.storyboard */; };
 		8BF4BE36BEDFEC62A5901027 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D607DA0783E67BBE83D97E3 /* ExploreView.swift */; };
 		A110AC1926323790276D6FFC /* HealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28DEFA1CC9CFEAA7CD0D0D29 /* HealthView.swift */; };
@@ -25,6 +26,7 @@
 		375353668969A14E3770AC70 /* WhatToEat.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = WhatToEat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8D607DA0783E67BBE83D97E3 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		9DFD7EC0BC355F5B63F4999D /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		C38C09EB728F3FEC89D9366C /* SwipeCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwipeCardView.swift; sourceTree = "<group>"; };
 		CEE479D68260A79BA52E2D8B /* APIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIService.swift; sourceTree = "<group>"; };
 		D130CC27A701FA7B283E5E50 /* Dish.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Dish.swift; sourceTree = "<group>"; };
 		D46272F771562B4B4CC2CC9C /* MockAPIService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAPIService.swift; sourceTree = "<group>"; };
@@ -101,6 +103,7 @@
 			isa = PBXGroup;
 			children = (
 				9DFD7EC0BC355F5B63F4999D /* HomeView.swift */,
+				C38C09EB728F3FEC89D9366C /* SwipeCardView.swift */,
 			);
 			path = Home;
 			sourceTree = "<group>";
@@ -214,6 +217,7 @@
 				A110AC1926323790276D6FFC /* HealthView.swift in Sources */,
 				B0730DE53FC9E6D7EE64F1F3 /* HomeView.swift in Sources */,
 				675A8941BCF8A44628188DBE /* MockAPIService.swift in Sources */,
+				7F37BDBEC381D7F63AF31002 /* SwipeCardView.swift in Sources */,
 				13FB7E620C1BBB09BB00DCF3 /* WhatToEatApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
