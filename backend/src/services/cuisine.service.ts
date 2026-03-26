@@ -2,7 +2,7 @@
  * 菜系服务
  * @module services/cuisine.service
  */
-import { getCuisinesByDb } from '../providers/database.provider';
+import { getCuisinesByFirestore } from '../providers/firebase.provider';
 
 export interface Cuisine {
   id: string;
@@ -18,14 +18,14 @@ export interface Cuisine {
  * 获取所有菜系列表
  */
 export async function getCuisines(): Promise<Cuisine[]> {
-  const rows = await getCuisinesByDb();
-  return rows.map((row) => ({
-    id: row.id,
-    name: row.name,
-    nameEn: row.name_en,
-    iconUrl: row.icon_url ?? '',
-    coverImageUrl: row.cover_image_url ?? '',
-    dishCount: row.dish_count,
-    tags: JSON.parse(row.tags ?? '[]'),
+  const rows = await getCuisinesByFirestore();
+  return rows.map((row: Record<string, unknown>) => ({
+    id: row.id as string,
+    name: row.name as string,
+    nameEn: row.nameEn as string,
+    iconUrl: (row.iconUrl as string) ?? '',
+    coverImageUrl: (row.coverImageUrl as string) ?? '',
+    dishCount: (row.dishCount as number) ?? 0,
+    tags: (row.tags as string[]) ?? [],
   }));
 }

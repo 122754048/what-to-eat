@@ -3,12 +3,12 @@
  * @module services/recommend.service
  */
 import {
-  getRandomDishByCuisineDb,
-  getCuisineByIdDb,
-  insertHistory,
-  getExcludedDishesDb,
-  addExcludedDishDb,
-} from '../providers/database.provider';
+  getRandomDishByCuisineFirestore,
+  getCuisineByIdFirestore,
+  insertHistoryFirestore,
+  getExcludedDishesFirestore,
+  addExcludedDishFirestore,
+} from '../providers/firebase.provider';
 
 export interface Dish {
   id: string;
@@ -40,55 +40,41 @@ export async function recommendDish(
   userId: string,
   excludePrevious: boolean
 ): Promise<Dish | null> {
-  // 检查菜系是否存在
-  const cuisine = await getCuisineByIdDb(cuisineId);
+  const cuisine = await getCuisineByIdFirestore(cuisineId);
   if (!cuisine) return null;
 
-  // 获取需要排除的菜品ID
   let excludeIds: string[] = [];
   if (excludePrevious) {
-    excludeIds = await getExcludedDishesDb(userId);
+    excludeIds = await getExcludedDishesFirestore(userId);
   }
 
-  // 随机查询一道菜品
-  const dish = await getRandomDishByCuisineDb(cuisineId, excludeIds);
+  const dish = await getRandomDishByCuisineFirestore(cuisineId, excludeIds);
   if (!dish) return null;
 
-  // 预置推荐理由
   const aiRecommendation =
     FALLBACK_RECOMMENDATIONS[
       Math.floor(Math.random() * FALLBACK_RECOMMENDATIONS.length)
     ];
 
-  // 更新会话排除列表
-  await addExcludedDishDb(userId, dish.id);
+  await addExcludedDishFirestore(userId, dish.id);
+  await insertHistoryFirestore(userId, dish.id, cuisineId);
 
-  // 记录到历史
-  await insertHistory(userId, dish.id, cuisineId);
-
-  return formatDish(dish, cuisine.name, aiRecommendation);
-}
-
-function formatDish(
-  dish: Record<string, unknown>,
-  cuisineName: string,
-  aiRecommendation: string
-): Dish {
+  const d = dish as Record<string, unknown>;
   return {
-    id: dish.id as string,
-    name: dish.name as string,
-    cuisineId: dish.cuisine_id as string,
-    cuisineName,
-    imageUrl: (dish.image_url as string) ?? '',
-    thumbnailUrl: (dish.thumbnail_url as string) ?? '',
+    id: d.id as string,
+    name: d.name as string,
+    cuisineId: d.cuisineId as string,
+    cuisineName: cuisine.name as string,
+    imageUrl: (d.imageUrl as string) ?? '',
+    thumbnailUrl: (d.thumbnailUrl as string) ?? '',
     calories: {
-      min: (dish.calories_min as number) ?? 0,
-      max: (dish.calories_max as number) ?? 0,
-      unit: (dish.calories_unit as string) ?? 'kcal',
+      min: (d.caloriesMin as number) ?? 0,
+      max: (d.caloriesMax as number) ?? 0,
+      unit: (d.caloriesUnit as string) ?? 'kcal',
     },
     aiRecommendation,
-    tags: JSON.parse((dish.tags as string) ?? '[]'),
-    difficulty: (dish.difficulty as string) ?? '',
-    cookTime: (dish.cook_time as string) ?? '',
+    tags: (d.tags as string[]) ?? [],
+    difficulty: (d.difficulty as string) ?? '',
+    cookTime: (d.cookTime as string) ?? '',
   };
 }

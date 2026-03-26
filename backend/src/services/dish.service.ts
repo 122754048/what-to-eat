@@ -2,7 +2,10 @@
  * 菜品服务
  * @module services/dish.service
  */
-import { getDishByIdDb, getCuisineByIdDb } from '../providers/database.provider';
+import {
+  getDishByIdFirestore,
+  getCuisineByIdFirestore,
+} from '../providers/firebase.provider';
 
 export interface DishDetail {
   id: string;
@@ -27,34 +30,33 @@ export interface DishDetail {
  * 获取菜品详情
  */
 export async function getDishDetail(dishId: string): Promise<DishDetail | null> {
-  const dish = await getDishByIdDb(dishId);
+  const dish = await getDishByIdFirestore(dishId);
   if (!dish) return null;
 
-  const cuisine = await getCuisineByIdDb(dish.cuisine_id as string);
-
-  const tags = JSON.parse((dish.tags as string) ?? '[]');
-  const recipeData = JSON.parse((dish.recipe as string) ?? '{}');
+  const d = dish as Record<string, unknown>;
+  const cuisineId = d.cuisineId as string;
+  const cuisine = cuisineId ? await getCuisineByIdFirestore(cuisineId) : null;
 
   return {
-    id: dish.id as string,
-    name: dish.name as string,
-    cuisineId: dish.cuisine_id as string,
-    cuisineName: cuisine?.name ?? '',
-    imageUrl: (dish.image_url as string) ?? '',
-    thumbnailUrl: (dish.thumbnail_url as string) ?? '',
+    id: d.id as string,
+    name: d.name as string,
+    cuisineId,
+    cuisineName: cuisine?.name as string ?? '',
+    imageUrl: (d.imageUrl as string) ?? '',
+    thumbnailUrl: (d.thumbnailUrl as string) ?? '',
     calories: {
-      min: (dish.calories_min as number) ?? 0,
-      max: (dish.calories_max as number) ?? 0,
-      unit: (dish.calories_unit as string) ?? 'kcal',
+      min: (d.caloriesMin as number) ?? 0,
+      max: (d.caloriesMax as number) ?? 0,
+      unit: (d.caloriesUnit as string) ?? 'kcal',
     },
-    aiRecommendation: (dish.ai_recommendation as string) ?? '',
-    tags,
-    difficulty: (dish.difficulty as string) ?? '',
-    cookTime: (dish.cook_time as string) ?? '',
+    aiRecommendation: (d.aiRecommendation as string) ?? '',
+    tags: (d.tags as string[]) ?? [],
+    difficulty: (d.difficulty as string) ?? '',
+    cookTime: (d.cookTime as string) ?? '',
     recipe: {
-      ingredients: recipeData.ingredients ?? [],
-      steps: recipeData.steps ?? [],
-      tips: recipeData.tips ?? [],
+      ingredients: [],
+      steps: [],
+      tips: [],
     },
   };
 }

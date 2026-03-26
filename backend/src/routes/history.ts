@@ -13,13 +13,8 @@ export const historyRouter = new Hono();
  */
 historyRouter.get('/history', async (c) => {
   const userId = c.req.header('X-User-ID') ?? 'anonymous';
-  const page = parseInt(c.req.query('page') ?? '1', 10);
-  const pageSize = Math.min(parseInt(c.req.query('pageSize') ?? '20', 10), 100);
-
-  // 参数校验
-  if (isNaN(page) || page < 1) {
-    return c.json(error(ErrorCodes.PARAM_INVALID, 'page 参数无效'), 400);
-  }
+  const page = Math.max(1, parseInt(c.req.query('page') ?? '1', 10));
+  const pageSize = Math.min(Math.max(1, parseInt(c.req.query('pageSize') ?? '20', 10)), 100);
 
   const result = await getHistory(userId, page, pageSize);
   return c.json({ code: 0, message: 'ok', data: result });
@@ -27,17 +22,15 @@ historyRouter.get('/history', async (c) => {
 
 /**
  * POST /history/:historyId/feedback - 反馈推荐结果
+ * 注意：Firestore 使用字符串 ID
  */
 historyRouter.post('/history/:historyId/feedback', async (c) => {
-  const historyIdStr = c.req.param('historyId');
+  const historyId = c.req.param('historyId');
   const userId = c.req.header('X-User-ID') ?? 'anonymous';
   const body = await c.req.json().catch(() => null);
 
-  const historyId = parseInt(historyIdStr, 10);
-
-  // 参数校验
-  if (isNaN(historyId) || historyId < 1) {
-    return c.json(error(ErrorCodes.PARAM_INVALID, 'historyId 参数无效'), 400);
+  if (!historyId || historyId.trim() === '') {
+    return c.json(error(ErrorCodes.PARAM_INVALID, 'historyId 不能为空'), 400);
   }
 
   if (body === null || typeof body.liked !== 'number' || body.liked < -1 || body.liked > 1) {
