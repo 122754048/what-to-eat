@@ -2,6 +2,9 @@ import Foundation
 
 // MARK: - API Configuration
 enum APIConfig {
+    // Set to true to use mock data (for demo without backend)
+    static let useMock = true
+
     #if DEBUG
     static let baseURL = "http://localhost:8787/api/v1"
     #else

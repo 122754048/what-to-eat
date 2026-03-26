@@ -60,7 +60,7 @@ struct ExploreView: View {
 
         Task {
             do {
-                let result = try await APIService.shared.getCuisines()
+                let result = try await fetchCuisines()
                 await MainActor.run {
                     cuisines = result
                     isLoading = false
@@ -76,7 +76,7 @@ struct ExploreView: View {
 
     private func refreshCuisines() async {
         do {
-            let result = try await APIService.shared.getCuisines()
+            let result = try await fetchCuisines()
             await MainActor.run {
                 cuisines = result
             }
@@ -244,7 +244,7 @@ struct CuisineDetailView: View {
         isLoading = true
         Task {
             do {
-                let dish = try await APIService.shared.recommendDish(cuisineId: cuisine.id)
+                let dish = try await fetchRecommendDish(cuisineId: cuisine.id)
                 await MainActor.run {
                     recommendedDish = dish
                     isLoading = false
@@ -255,6 +255,23 @@ struct CuisineDetailView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+
+    // MARK: - Data Access (supports mock)
+    private func fetchCuisines() async throws -> [Cuisine] {
+        if APIConfig.useMock {
+            return try await MockAPIService.shared.getCuisines()
+        } else {
+            return try await APIService.shared.getCuisines()
+        }
+    }
+
+    private func fetchRecommendDish(cuisineId: String) async throws -> Dish {
+        if APIConfig.useMock {
+            return try await MockAPIService.shared.recommendDish(cuisineId: cuisineId)
+        } else {
+            return try await APIService.shared.recommendDish(cuisineId: cuisineId)
         }
     }
 }

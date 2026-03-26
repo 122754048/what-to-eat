@@ -97,7 +97,7 @@ struct HealthView: View {
 
         Task {
             do {
-                let dish = try await AIService.shared.suggestHealthy(goal: goal)
+                let dish = try await fetchHealthyDish(goal: goal)
                 await MainActor.run {
                     recommendedDishes = [dish]
                     isLoading = false
@@ -109,6 +109,20 @@ struct HealthView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+
+    // MARK: - Data Access (supports mock)
+    private func fetchHealthyDish(goal: String) async throws -> Dish {
+        if APIConfig.useMock {
+            // In mock mode, just return a random healthy dish
+            let cuisines = try await MockAPIService.shared.getCuisines()
+            if let randomCuisine = cuisines.randomElement() {
+                return try await MockAPIService.shared.recommendDish(cuisineId: randomCuisine.id)
+            }
+            throw APIError.serverError(code: 50001, message: "暂无数据")
+        } else {
+            return try await AIService.shared.suggestHealthy(goal: goal)
         }
     }
 }

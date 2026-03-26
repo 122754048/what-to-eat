@@ -131,15 +131,12 @@ struct HomeView: View {
 
         Task {
             do {
-                // V1: Random cuisine recommendation
-                // TODO: In future, pick a random cuisineId first, or let user pick
-                // For now, we need at least one cuisine to call recommend
-                let cuisines = try await APIService.shared.getCuisines()
+                let cuisines = try await getCuisines()
                 guard let randomCuisine = cuisines.randomElement() else {
                     throw APIError.serverError(code: 50001, message: "暂无菜系数据")
                 }
 
-                let dish = try await APIService.shared.recommendDish(cuisineId: randomCuisine.id)
+                let dish = try await recommendDish(cuisineId: randomCuisine.id)
                 await MainActor.run {
                     recommendedDish = dish
                     isLoading = false
@@ -151,6 +148,23 @@ struct HomeView: View {
                     isLoading = false
                 }
             }
+        }
+    }
+
+    // MARK: - Data Access (supports mock)
+    private func getCuisines() async throws -> [Cuisine] {
+        if APIConfig.useMock {
+            return try await MockAPIService.shared.getCuisines()
+        } else {
+            return try await APIService.shared.getCuisines()
+        }
+    }
+
+    private func recommendDish(cuisineId: String) async throws -> Dish {
+        if APIConfig.useMock {
+            return try await MockAPIService.shared.recommendDish(cuisineId: cuisineId)
+        } else {
+            return try await APIService.shared.recommendDish(cuisineId: cuisineId)
         }
     }
 }
