@@ -2,7 +2,7 @@
  * 菜系服务
  * @module services/cuisine.service
  */
-import { getCuisinesByD1 } from '../providers/database.provider';
+import { getCuisinesByDb } from '../providers/database.provider';
 
 export interface Cuisine {
   id: string;
@@ -18,20 +18,14 @@ export interface Cuisine {
  * 获取所有菜系列表
  */
 export async function getCuisines(): Promise<Cuisine[]> {
-  const stmt = await getCuisinesByD1();
-  const result = await stmt.all();
-  const rows = (result as { results?: unknown[] }).results ?? [];
-
-  return rows.map((row: unknown) => {
-    const r = row as Record<string, unknown>;
-    return {
-      id: r.id as string,
-      name: r.name as string,
-      nameEn: r.name_en as string,
-      iconUrl: (r.icon_url as string) ?? '',
-      coverImageUrl: (r.cover_image_url as string) ?? '',
-      dishCount: r.dish_count as number,
-      tags: JSON.parse((r.tags as string) ?? '[]'),
-    };
-  });
+  const rows = await getCuisinesByDb();
+  return rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    nameEn: row.name_en,
+    iconUrl: row.icon_url ?? '',
+    coverImageUrl: row.cover_image_url ?? '',
+    dishCount: row.dish_count,
+    tags: JSON.parse(row.tags ?? '[]'),
+  }));
 }

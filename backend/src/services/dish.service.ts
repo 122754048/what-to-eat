@@ -2,7 +2,7 @@
  * 菜品服务
  * @module services/dish.service
  */
-import { getDishById, getCuisineById } from '../providers/database.provider';
+import { getDishByIdDb, getCuisineByIdDb } from '../providers/database.provider';
 
 export interface DishDetail {
   id: string;
@@ -11,11 +11,7 @@ export interface DishDetail {
   cuisineName: string;
   imageUrl: string;
   thumbnailUrl: string;
-  calories: {
-    min: number;
-    max: number;
-    unit: string;
-  };
+  calories: { min: number; max: number; unit: string };
   aiRecommendation: string;
   tags: string[];
   difficulty: string;
@@ -31,20 +27,11 @@ export interface DishDetail {
  * 获取菜品详情
  */
 export async function getDishDetail(dishId: string): Promise<DishDetail | null> {
-  const stmt = await getDishById(dishId);
-  const dish = await stmt.first() as Record<string, unknown> | null;
+  const dish = await getDishByIdDb(dishId);
   if (!dish) return null;
 
-  const cuisineStmt = await getCuisineById(dish.cuisine_id as string);
-  const cuisine = await cuisineStmt.first() as Record<string, unknown> | null;
+  const cuisine = await getCuisineByIdDb(dish.cuisine_id as string);
 
-  return formatDishDetail(dish, cuisine);
-}
-
-function formatDishDetail(
-  dish: Record<string, unknown>,
-  cuisine: Record<string, unknown> | null
-): DishDetail {
   const tags = JSON.parse((dish.tags as string) ?? '[]');
   const recipeData = JSON.parse((dish.recipe as string) ?? '{}');
 
@@ -52,7 +39,7 @@ function formatDishDetail(
     id: dish.id as string,
     name: dish.name as string,
     cuisineId: dish.cuisine_id as string,
-    cuisineName: cuisine?.name as string ?? '',
+    cuisineName: cuisine?.name ?? '',
     imageUrl: (dish.image_url as string) ?? '',
     thumbnailUrl: (dish.thumbnail_url as string) ?? '',
     calories: {

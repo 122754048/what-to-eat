@@ -2,14 +2,13 @@
  * 推荐服务
  * @module services/recommend.service
  */
-import type { D1Database, KVNamespace } from '@cloudflare/workers-types';
-import { getRandomDishByCuisine, getCuisineById, insertRecommendationHistory } from '../providers/database.provider';
-import { generateAIRecommendation } from '../providers/ai.provider';
-import { getExcludedDishes, addExcludedDish } from '../providers/kv.provider';
-
-// D1/KV 通过 wrangler.toml 绑定，运行时注入
-declare const DB: D1Database;
-declare const KV: KVNamespace;
+import {
+  getRandomDishByCuisineDb,
+  getCuisineByIdDb,
+  insertHistory,
+  getExcludedDishesDb,
+  addExcludedDishDb,
+} from '../providers/database.provider';
 
 export interface Dish {
   id: string;
@@ -18,16 +17,20 @@ export interface Dish {
   cuisineName: string;
   imageUrl: string;
   thumbnailUrl: string;
-  calories: {
-    min: number;
-    max: number;
-    unit: string;
-  };
+  calories: { min: number; max: number; unit: string };
   aiRecommendation: string;
   tags: string[];
   difficulty: string;
   cookTime: string;
 }
+
+const FALLBACK_RECOMMENDATIONS = [
+  '经典菜品，口碑极佳，值得一试！',
+  '这道菜深受大家喜爱，快来尝尝吧！',
+  '香气扑鼻，保证让你胃口大开！',
+  '色香味俱全，绝对是下饭神器！',
+  '厨房小白也能轻松搞定，快来试试！',
+];
 
 /**
  * 随机推荐一道菜品
@@ -38,46 +41,44 @@ export async function recommendDish(
   excludePrevious: boolean
 ): Promise<Dish | null> {
   // 检查菜系是否存在
-  const cuisineStmt = await getCuisineById(cuisineId);
-  const cuisine = await cuisineStmt.first();
+  const cuisine = await getCuisineByIdDb(cuisineId);
   if (!cuisine) return null;
 
   // 获取需要排除的菜品ID
   let excludeIds: string[] = [];
   if (excludePrevious) {
-    excludeIds = await getExcludedDishes(userId);
+    excludeIds = await getExcludedDishesDb(userId);
   }
 
   // 随机查询一道菜品
-  const dishStmt = await getRandomDishByCuisine(cuisineId, excludeIds);
-  const dish = await dishStmt.first() as Record<string, unknown> | null;
+  const dish = await getRandomDishByCuisineDb(cuisineId, excludeIds);
   if (!dish) return null;
 
-  // 生成AI推荐理由
-  const aiRecommendation = await generateAIRecommendation(dish.name as string);
+  // 预置推荐理由
+  const aiRecommendation =
+    FALLBACK_RECOMMENDATIONS[
+      Math.floor(Math.random() * FALLBACK_RECOMMENDATIONS.length)
+    ];
 
-  // 记录到KV（会话级去重）
-  await addExcludedDish(userId, dish.id as string);
+  // 更新会话排除列表
+  await addExcludedDishDb(userId, dish.id);
 
   // 记录到历史
-  await insertRecommendationHistory(userId, dish.id as string, cuisineId);
+  await insertHistory(userId, dish.id, cuisineId);
 
-  return formatDish(dish, cuisine, aiRecommendation);
+  return formatDish(dish, cuisine.name, aiRecommendation);
 }
 
 function formatDish(
   dish: Record<string, unknown>,
-  cuisine: Record<string, unknown>,
+  cuisineName: string,
   aiRecommendation: string
 ): Dish {
-  const tags = JSON.parse((dish.tags as string) ?? '[]');
-  const recipe = JSON.parse((dish.recipe as string) ?? '{}');
-
   return {
     id: dish.id as string,
     name: dish.name as string,
     cuisineId: dish.cuisine_id as string,
-    cuisineName: cuisine.name as string,
+    cuisineName,
     imageUrl: (dish.image_url as string) ?? '',
     thumbnailUrl: (dish.thumbnail_url as string) ?? '',
     calories: {
@@ -86,7 +87,7 @@ function formatDish(
       unit: (dish.calories_unit as string) ?? 'kcal',
     },
     aiRecommendation,
-    tags,
+    tags: JSON.parse((dish.tags as string) ?? '[]'),
     difficulty: (dish.difficulty as string) ?? '',
     cookTime: (dish.cook_time as string) ?? '',
   };

@@ -3,10 +3,10 @@
  * @module services/history.service
  */
 import {
-  getRecommendationHistory,
-  getHistoryCount,
-  updateHistoryFeedback,
-  getHistoryById,
+  getHistoryDb,
+  getHistoryCountDb,
+  updateFeedbackDb,
+  getHistoryByIdDb,
 } from '../providers/database.provider';
 
 export interface HistoryItem {
@@ -33,37 +33,21 @@ export async function getHistory(
   page: number,
   pageSize: number
 ): Promise<HistoryResult> {
-  const [historyStmt, countStmt] = await Promise.all([
-    getRecommendationHistory(userId, page, pageSize),
-    getHistoryCount(userId),
+  const [rows, total] = await Promise.all([
+    getHistoryDb(userId, page, pageSize),
+    getHistoryCountDb(userId),
   ]);
 
-  const [historyResult, countRow] = await Promise.all([
-    historyStmt.all(),
-    countStmt.first(),
-  ]);
+  const items: HistoryItem[] = rows.map((row) => ({
+    id: row.id,
+    dishId: row.dish_id,
+    dishName: row.dish_name,
+    cuisineName: row.cuisine_name,
+    recommendedAt: row.recommended_at,
+    liked: row.liked,
+  }));
 
-  const rows = (historyResult as { results?: unknown[] }).results ?? [];
-  const count = countRow as { count: number } | null;
-
-  const items: HistoryItem[] = rows.map((row: unknown) => {
-    const r = row as Record<string, unknown>;
-    return {
-      id: r.id as number,
-      dishId: r.dish_id as string,
-      dishName: r.dish_name as string,
-      cuisineName: r.cuisine_name as string,
-      recommendedAt: r.recommended_at as number,
-      liked: r.liked as number,
-    };
-  });
-
-  return {
-    items,
-    total: count?.count ?? 0,
-    page,
-    pageSize,
-  };
+  return { items, total, page, pageSize };
 }
 
 /**
@@ -74,13 +58,8 @@ export async function giveFeedback(
   userId: string,
   liked: number
 ): Promise<boolean> {
-  const stmt = await getHistoryById(historyId);
-  const record = await stmt.first() as Record<string, unknown> | null;
-
-  if (!record || record.user_id !== userId) {
-    return false;
-  }
-
-  await updateHistoryFeedback(historyId, liked);
+  const record = await getHistoryByIdDb(historyId);
+  if (!record || record.user_id !== userId) return false;
+  await updateFeedbackDb(historyId, liked);
   return true;
 }
