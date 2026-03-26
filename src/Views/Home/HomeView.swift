@@ -45,14 +45,14 @@ extension Color {
     }
 }
 
-// MARK: - Home View
+// MARK: - Home View (Container)
 struct HomeView: View {
-    @State private var dishes: [Dish] = []
-    @State private var currentIndex = 0
-    @State private var isLoading = false
-    @State private var errorMessage: String?
-    @State private var showAlert = false
-    @State private var lastAction: String = ""
+    @State private var selectedMode: HomeMode = .swipe
+
+    enum HomeMode: String, CaseIterable {
+        case swipe = "滑动"
+        case browse = "浏览"
+    }
 
     var body: some View {
         NavigationStack {
@@ -60,63 +60,85 @@ struct HomeView: View {
                 Design.Colors.background
                     .ignoresSafeArea()
 
-                VStack(spacing: Design.Spacing.cardMargin) {
-                    // Header
-                    headerView
+                VStack(spacing: 0) {
+                    // Mode Picker
+                    modePicker
 
-                    Spacer()
-
-                    // Card Stack or Empty State
-                    if isLoading {
-                        loadingView
-                    } else if dishes.isEmpty {
-                        emptyStateView
-                    } else if currentIndex < dishes.count {
-                        cardStackView
-                    } else {
-                        allDoneView
-                    }
-
-                    Spacer()
-
-                    // Action Buttons
-                    if !dishes.isEmpty && currentIndex < dishes.count {
-                        actionButtonsView
+                    // Content
+                    switch selectedMode {
+                    case .swipe:
+                        SwipeCardContainer()
+                    case .browse:
+                        HomeContentView()
                     }
                 }
-                .padding(.horizontal, Design.Spacing.screenPadding)
             }
-            .navigationBarHidden(true)
-            .alert("出错了", isPresented: $showAlert) {
-                Button("重试") { loadDishes() }
-                Button("取消", role: .cancel) {}
-            } message: {
-                Text(errorMessage ?? "未知错误")
-            }
-            .onAppear {
-                if dishes.isEmpty {
-                    loadDishes()
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .principal) {
+                    Text("今天吃什么？")
+                        .font(.headline)
+                        .foregroundColor(Design.Colors.primaryText)
                 }
+            }
+        }
+    }
+
+    private var modePicker: some View {
+        Picker("", selection: $selectedMode) {
+            ForEach(HomeMode.allCases, id: \.self) { mode in
+                Text(mode.rawValue)
+                    .tag(mode)
+            }
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, Design.Spacing.screenPadding)
+        .padding(.vertical, Design.Spacing.standard)
+    }
+}
+
+// MARK: - Swipe Card Container
+struct SwipeCardContainer: View {
+    @State private var dishes: [Dish] = []
+    @State private var currentIndex = 0
+    @State private var isLoading = false
+    @State private var errorMessage: String?
+    @State private var showAlert = false
+    @State private var showDetail = false
+    @State private var selectedDish: Dish?
+
+    var body: some View {
+        ZStack {
+            if isLoading {
+                loadingView
+            } else if dishes.isEmpty {
+                emptyStateView
+            } else if currentIndex >= dishes.count {
+                allDoneView
+            } else {
+                cardStackView
+            }
+        }
+        .onAppear {
+            if dishes.isEmpty {
+                loadDishes()
+            }
+        }
+        .alert("出错了", isPresented: $showAlert) {
+            Button("重试") { loadDishes() }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text(errorMessage ?? "未知错误")
+        }
+        .sheet(isPresented: $showDetail) {
+            if let dish = selectedDish {
+                DishDetailSheet(dish: dish)
             }
         }
     }
 
     // MARK: - Subviews
-
-    private var headerView: some View {
-        VStack(alignment: .leading, spacing: Design.Spacing.element) {
-            Text("今天吃什么？")
-                .font(.largeTitle)
-                .fontWeight(.bold)
-                .foregroundColor(Design.Colors.primaryText)
-
-            Text("滑动卡片，探索美食")
-                .font(.subheadline)
-                .foregroundColor(Design.Colors.secondaryText)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.top, Design.Spacing.screenPadding)
-    }
 
     private var loadingView: some View {
         VStack(spacing: Design.Spacing.cardMargin) {
@@ -126,7 +148,6 @@ struct HomeView: View {
                 .font(.body)
                 .foregroundColor(Design.Colors.secondaryText)
         }
-        .frame(height: 480)
     }
 
     private var emptyStateView: some View {
@@ -139,10 +160,6 @@ struct HomeView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(Design.Colors.primaryText)
-
-            Text("稍后再试")
-                .font(.body)
-                .foregroundColor(Design.Colors.secondaryText)
 
             Button {
                 loadDishes()
@@ -158,9 +175,7 @@ struct HomeView: View {
                             .fill(Design.Colors.accent)
                     )
             }
-            .padding(.top, Design.Spacing.standard)
         }
-        .frame(height: 480)
     }
 
     private var allDoneView: some View {
@@ -193,51 +208,50 @@ struct HomeView: View {
                             .fill(Design.Colors.accent)
                     )
             }
-            .padding(.top, Design.Spacing.standard)
         }
-        .frame(height: 480)
     }
 
     private var cardStackView: some View {
-        ZStack {
-            ForEach(visibleDishes.reversed()) { dish in
-                SwipeCardView(
-                    dish: dish,
-                    onSwipeLeft: { handleSwipeLeft(dish) },
-                    onSwipeRight: { handleSwipeRight(dish) },
-                    onSwipeUp: { handleSwipeUp(dish) }
-                )
-                .zIndex(zIndex(for: dish))
+        VStack {
+            Spacer()
+
+            ZStack {
+                ForEach(visibleDishes.reversed()) { dish in
+                    SwipeCardView(
+                        dish: dish,
+                        onSwipeLeft: { handleSwipe(dish, direction: .left) },
+                        onSwipeRight: { handleSwipe(dish, direction: .right) },
+                        onSwipeUp: { handleSwipe(dish, direction: .up) }
+                    )
+                    .zIndex(zIndex(for: dish))
+                    .onTapGesture {
+                        selectedDish = dish
+                        showDetail = true
+                    }
+                }
             }
+            .frame(height: 500)
+
+            Spacer()
+
+            actionButtons
         }
-        .frame(height: 480)
+        .padding(.horizontal, Design.Spacing.screenPadding)
     }
 
-    private var actionButtonsView: some View {
-        HStack(spacing: Design.Spacing.cardMargin) {
-            // Nope Button
-            actionButton(
-                icon: "xmark",
-                color: .red,
-                size: 50,
-                action: { swipeCurrentCard(direction: .left) }
-            )
+    private var actionButtons: some View {
+        HStack(spacing: Design.Spacing.cardMargin * 2) {
+            actionButton(icon: "xmark", color: .red, size: 50) {
+                swipeCurrentCard(direction: .left)
+            }
 
-            // Super Like Button
-            actionButton(
-                icon: "star.fill",
-                color: .yellow,
-                size: 44,
-                action: { swipeCurrentCard(direction: .up) }
-            )
+            actionButton(icon: "star.fill", color: .yellow, size: 44) {
+                swipeCurrentCard(direction: .up)
+            }
 
-            // Like Button
-            actionButton(
-                icon: "heart.fill",
-                color: Design.Colors.primary,
-                size: 50,
-                action: { swipeCurrentCard(direction: .right) }
-            )
+            actionButton(icon: "heart.fill", color: Design.Colors.primary, size: 50) {
+                swipeCurrentCard(direction: .right)
+            }
         }
         .padding(.bottom, Design.Spacing.cardMargin)
     }
@@ -258,7 +272,7 @@ struct HomeView: View {
         .buttonStyle(ScaleButtonStyle())
     }
 
-    // MARK: - Computed Properties
+    // MARK: - Computed
 
     private var visibleDishes: [Dish] {
         let endIndex = min(currentIndex + 3, dishes.count)
@@ -286,7 +300,6 @@ struct HomeView: View {
                     throw APIError.serverError(code: 50001, message: "暂无菜系数据")
                 }
 
-                // Load multiple dishes for the card stack
                 var loadedDishes: [Dish] = []
                 for _ in 0..<5 {
                     let dish = try await fetchRecommendDish(cuisineId: randomCuisine.id)
@@ -308,39 +321,24 @@ struct HomeView: View {
         }
     }
 
-    private func handleSwipeLeft(_ dish: Dish) {
-        lastAction = "跳过 \(dish.name)"
-        currentIndex += 1
-    }
+    private enum SwipeDirection { case left, right, up }
 
-    private func handleSwipeRight(_ dish: Dish) {
-        lastAction = "喜欢 \(dish.name)"
-        // TODO: Send feedback to backend
-        currentIndex += 1
-    }
-
-    private func handleSwipeUp(_ dish: Dish) {
-        lastAction = "超级喜欢 \(dish.name)"
-        // TODO: Send super like feedback to backend
-        currentIndex += 1
-    }
-
-    private enum SwipeDirection {
-        case left, right, up
+    private func handleSwipe(_ dish: Dish, direction: SwipeDirection) {
+        switch direction {
+        case .left: currentIndex += 1
+        case .right: currentIndex += 1
+        case .up: currentIndex += 1
+        }
     }
 
     private func swipeCurrentCard(direction: SwipeDirection) {
         guard currentIndex < dishes.count else { return }
         let dish = dishes[currentIndex]
-
-        switch direction {
-        case .left: handleSwipeLeft(dish)
-        case .right: handleSwipeRight(dish)
-        case .up: handleSwipeUp(dish)
-        }
+        handleSwipe(dish, direction: direction)
     }
 
-    // MARK: - Data Access (supports mock)
+    // MARK: - Data Access
+
     private func fetchCuisines() async throws -> [Cuisine] {
         if APIConfig.useMock {
             return try await MockAPIService.shared.getCuisines()
@@ -355,6 +353,127 @@ struct HomeView: View {
         } else {
             return try await APIService.shared.recommendDish(cuisineId: cuisineId)
         }
+    }
+}
+
+// MARK: - Dish Detail Sheet
+struct DishDetailSheet: View {
+    let dish: Dish
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 0) {
+                    // Hero Image
+                    AsyncImage(url: dish.imageUrl) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        default:
+                            Rectangle()
+                                .fill(Design.Colors.cardBackground)
+                        }
+                    }
+                    .frame(height: 300)
+                    .clipped()
+
+                    VStack(alignment: .leading, spacing: Design.Spacing.cardMargin) {
+                        // Title
+                        Text(dish.name)
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(Design.Colors.primaryText)
+
+                        // Cuisine & Calories
+                        HStack(spacing: Design.Spacing.standard) {
+                            Label(dish.cuisineName, systemImage: "fork.knife")
+                                .font(.subheadline)
+                                .foregroundColor(Design.Colors.secondaryText)
+
+                            if let calories = dish.calories {
+                                Label("\(calories.min)-\(calories.max) \(calories.unit)", systemImage: "flame.fill")
+                                    .font(.subheadline)
+                                    .foregroundColor(Design.Colors.primary)
+                            }
+                        }
+
+                        // Recommendation
+                        if let recommendation = dish.aiRecommendation {
+                            Text(recommendation)
+                                .font(.body)
+                                .foregroundColor(Design.Colors.primaryText)
+                                .padding()
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .background(
+                                    RoundedRectangle(cornerRadius: Design.CornerRadius.card)
+                                        .fill(Design.Colors.cardBackground)
+                                )
+                        }
+
+                        // Tags
+                        if !dish.tags.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: Design.Spacing.element) {
+                                    ForEach(dish.tags, id: \.self) { tag in
+                                        Text(tag)
+                                            .font(.caption)
+                                            .foregroundColor(Design.Colors.primary)
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Capsule()
+                                                    .fill(Design.Colors.primary.opacity(0.12))
+                                            )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Meta Info
+                        if let difficulty = dish.difficulty {
+                            metaRow(icon: "chart.bar", label: "难度", value: difficulty)
+                        }
+
+                        if let cookTime = dish.cookTime {
+                            metaRow(icon: "clock", label: "烹饪时间", value: cookTime)
+                        }
+                    }
+                    .padding(Design.Spacing.screenPadding)
+                }
+            }
+            .background(Design.Colors.background)
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("完成") {
+                        dismiss()
+                    }
+                    .foregroundColor(Design.Colors.accent)
+                }
+            }
+        }
+    }
+
+    private func metaRow(icon: String, label: String, value: String) -> some View {
+        HStack {
+            Image(systemName: icon)
+                .foregroundColor(Design.Colors.secondaryText)
+                .frame(width: 24)
+
+            Text(label)
+                .font(.body)
+                .foregroundColor(Design.Colors.secondaryText)
+
+            Spacer()
+
+            Text(value)
+                .font(.body)
+                .foregroundColor(Design.Colors.primaryText)
+        }
+        .padding(.vertical, Design.Spacing.element)
     }
 }
 
