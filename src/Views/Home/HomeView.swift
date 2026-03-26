@@ -81,6 +81,20 @@ struct HomeView: View {
                         .font(.headline)
                         .foregroundColor(Design.Colors.primaryText)
                 }
+
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showFilter = true
+                    } label: {
+                        Image(systemName: selectedFilters.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
+                            .foregroundColor(Design.Colors.primary)
+                    }
+                }
+            }
+            .sheet(isPresented: $showFilter) {
+                DietFilterSheet(selectedFilters: $selectedFilters) {
+                    // Apply filters - in production, would refetch dishes
+                }
             }
         }
     }
@@ -107,6 +121,8 @@ struct SwipeCardContainer: View {
     @State private var showAlert = false
     @State private var showDetail = false
     @State private var selectedDish: Dish?
+    @State private var showFilter = false
+    @State private var selectedFilters: Set<DietFilter> = []
 
     var body: some View {
         ZStack {
