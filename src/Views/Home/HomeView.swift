@@ -115,6 +115,19 @@ struct HomeView: View {
                 .padding(.horizontal, Design.Spacing.screenPadding)
             }
             .navigationBarHidden(true)
+            .alert("出错了", isPresented: Binding(
+                get: { errorMessage != nil },
+                set: { if !$0 { errorMessage = nil } }
+            )) {
+                Button("重试") {
+                    triggerRandomDecision()
+                }
+                Button("取消", role: .cancel) {
+                    errorMessage = nil
+                }
+            } message: {
+                Text(errorMessage ?? "未知错误")
+            }
             .sheet(isPresented: $isShowingResult) {
                 if let dish = recommendedDish {
                     DishResultSheet(dish: dish) {

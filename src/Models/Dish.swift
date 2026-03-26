@@ -1,8 +1,4 @@
 import Foundation
 
-struct Dish: Identifiable {
-    let id = UUID()
-    let name: String
-    let cuisine: String
-    let imageUrl: URL?
-}
+// Note: Dish model is defined in APIService.swift to keep all Codable models together.
+// This file is kept for future extensibility.
