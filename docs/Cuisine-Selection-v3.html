@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>菜系选择</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', sans-serif;
+            background: #FFFFFF;
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            padding-bottom: 100px;
+            color: #1D1D1F;
+        }
+
+        .header {
+            padding: 24px;
+            padding-top: 60px;
+        }
+
+        .title {
+            font-size: 34px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 17px;
+            color: #86868B;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 24px;
+        }
+
+        .cuisine-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 1;
+        }
+
+        .cuisine-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .cuisine-card .overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 16px;
+            background: linear-gradient(transparent, rgba(0,0,0,0.5));
+            color: white;
+        }
+
+        .cuisine-card .name {
+            font-size: 17px;
+            font-weight: 600;
+        }
+
+        .cuisine-card .count {
+            font-size: 13px;
+            opacity: 0.8;
+        }
+
+        .cuisine-card.selected {
+            outline: 3px solid #7CB97D;
+            outline-offset: -3px;
+        }
+
+        .cuisine-card.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 28px;
+            height: 28px;
+            background: #7CB97D;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bottom-action {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            padding: 16px 24px;
+            padding-bottom: 34px;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0,0,0,0.08);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: #F4A261;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1 class="title">探索菜系</h1>
+        <p class="subtitle">选择你今天想吃的菜系</p>
+    </div>
+
+    <div class="grid">
+        <div class="cuisine-card selected">
+            <img src="https://images.unsplash.com/photo-1563245372-f21724e3856d?w=400" alt="中餐">
+            <div class="overlay">
+                <div class="name">中餐</div>
+                <div class="count">128 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=400" alt="日料">
+            <div class="overlay">
+                <div class="name">日料</div>
+                <div class="count">86 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1498654896293-37aacf113fd9?w=400" alt="韩餐">
+            <div class="overlay">
+                <div class="name">韩餐</div>
+                <div class="count">64 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1562565652-a0d8f0c59eb4?w=400" alt="泰餐">
+            <div class="overlay">
+                <div class="name">泰餐</div>
+                <div class="count">52 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1473093295043-cdd812d0e601?w=400" alt="意大利菜">
+            <div class="overlay">
+                <div class="name">意大利菜</div>
+                <div class="count">78 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1544025162-d76694265947?w=400" alt="法餐">
+            <div class="overlay">
+                <div class="name">法餐</div>
+                <div class="count">45 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=400" alt="美式">
+            <div class="overlay">
+                <div class="name">美式</div>
+                <div class="count">92 道菜</div>
+            </div>
+        </div>
+        <div class="cuisine-card">
+            <img src="https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=400" alt="印度菜">
+            <div class="overlay">
+                <div class="name">印度菜</div>
+                <div class="count">38 道菜</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bottom-action">
+        <button class="btn">随机一道中餐</button>
+    </div>
+</body>
+</html>

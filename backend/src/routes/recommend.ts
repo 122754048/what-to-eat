@@ -14,7 +14,7 @@ export const recommendRouter = new Hono();
 recommendRouter.post('/cuisines/:cuisineId/recommend', async (c) => {
   const cuisineId = c.req.param('cuisineId');
 
-  // 参数校验：cuisineId 不能为空
+  // 参数校验
   if (!cuisineId || cuisineId.trim() === '') {
     return c.json(error(ErrorCodes.PARAM_INVALID, 'cuisineId 不能为空'), 400);
   }

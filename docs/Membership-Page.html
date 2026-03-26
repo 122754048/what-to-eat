@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>会员升级 - 吃什么</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
+            background: linear-gradient(180deg, #1a1a1a 0%, #2d2d2d 100%);
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+            color: white;
+        }
+        .header {
+            padding: 60px 20px 40px;
+            text-align: center;
+        }
+        .crown { font-size: 64px; margin-bottom: 20px; }
+        .title { font-size: 28px; font-weight: 700; margin-bottom: 8px; }
+        .subtitle { font-size: 15px; color: rgba(255,255,255,0.7); }
+        .plans { padding: 20px; }
+        .plan-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            border: 1.5px solid rgba(255,255,255,0.2);
+        }
+        .plan-card.featured {
+            background: linear-gradient(135deg, #7CB97D, #5FA85F);
+            border: none;
+        }
+        .plan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .plan-name { font-size: 20px; font-weight: 600; }
+        .plan-price { font-size: 28px; font-weight: 700; }
+        .plan-period { font-size: 14px; color: rgba(255,255,255,0.7); }
+        .plan-features { list-style: none; }
+        .plan-features li {
+            font-size: 14px;
+            padding: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .plan-features li::before { content: '✓'; color: #7CB97D; }
+        .select-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            border: none;
+            margin-top: 16px;
+            cursor: pointer;
+        }
+        .plan-card:not(.featured) .select-btn {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
+        .plan-card.featured .select-btn {
+            background: white;
+            color: #5FA85F;
+        }
+        .guarantee {
+            text-align: center;
+            padding: 20px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="crown">👑</div>
+        <h1 class="title">升级 Premium</h1>
+        <p class="subtitle">解锁全部高级功能，畅享无限制体验</p>
+    </div>
+    
+    <div class="plans">
+        <div class="plan-card">
+            <div class="plan-header">
+                <span class="plan-name">月度会员</span>
+                <div>
+                    <span class="plan-price">¥28</span>
+                    <span class="plan-period">/月</span>
+                </div>
+            </div>
+            <ul class="plan-features">
+                <li>无限滑动次数</li>
+                <li>解锁全部菜系</li>
+                <li>专属健康推荐</li>
+            </ul>
+            <button class="select-btn">选择月度</button>
+        </div>
+        
+        <div class="plan-card featured">
+            <div class="plan-header">
+                <span class="plan-name">年度会员</span>
+                <div>
+                    <span class="plan-price">¥198</span>
+                    <span class="plan-period">/年</span>
+                </div>
+            </div>
+            <ul class="plan-features">
+                <li>全部月度特权</li>
+                <li>专属配菜推荐</li>
+                <li>优先客服支持</li>
+                <li>节省¥138/年</li>
+            </ul>
+            <button class="select-btn">选择年度</button>
+        </div>
+    </div>
+    
+    <div class="guarantee">
+        🔒 支持7天无理由退款
+    </div>
+</body>
+</html>

@@ -6,7 +6,7 @@ enum APIConfig {
     static let useMock = true
 
     #if DEBUG
-    static let baseURL = "http://localhost:8787/api/v1"
+    static let baseURL = "http://localhost:3000/api/v1"
     #else
     static let baseURL = "https://what-to-eat.{account}.workers.dev/api/v1"
     #endif
@@ -207,7 +207,7 @@ class APIService {
         let body: [String: Any] = ["excludePrevious": excludePrevious]
         let response: Response = try await request(
             method: "POST",
-            endpoint: "/cuisines/\(cuisineId)/recommend",
+            endpoint: "/recommend/cuisines/\(cuisineId)/recommend",
             body: body
         )
         return response.dish

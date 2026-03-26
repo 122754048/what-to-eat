@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>登录/注册 - 吃什么</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
+            background: #FFFFFF;
+            max-width: 430px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+        .logo-area {
+            padding: 80px 0 60px;
+            text-align: center;
+        }
+        .logo {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        .app-name {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2D2D2D;
+        }
+        .app-slogan {
+            font-size: 14px;
+            color: #8E8E93;
+            margin-top: 8px;
+        }
+        .login-form {
+            padding: 0 24px;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-label {
+            font-size: 14px;
+            color: #8E8E93;
+            margin-bottom: 8px;
+            display: block;
+        }
+        .input-field {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #E8E8E8;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-field:focus {
+            border-color: #7CB97D;
+        }
+        .input-field::placeholder {
+            color: #C7C7CC;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #7CB97D, #5FA85F);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 600;
+            margin-top: 24px;
+            cursor: pointer;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 32px 0;
+            color: #C7C7CC;
+            font-size: 13px;
+        }
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 0.5px;
+            background: #E8E8E8;
+        }
+        .divider span { padding: 0 16px; }
+        .social-login {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+        }
+        .social-btn {
+            width: 60px;
+            height: 60px;
+            border: 1px solid #E8E8E8;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: white;
+        }
+        .footer-links {
+            position: absolute;
+            bottom: 40px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 13px;
+            color: #8E8E93;
+        }
+        .footer-links a {
+            color: #7CB97D;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body style="position: relative; padding-bottom: 100px;">
+    <div class="logo-area">
+        <div class="logo">🍽️</div>
+        <div class="app-name">吃什么</div>
+        <div class="app-slogan">让AI帮你决定今天吃什么</div>
+    </div>
+    
+    <div class="login-form">
+        <div class="input-group">
+            <label class="input-label">手机号</label>
+            <input type="tel" class="input-field" placeholder="请输入手机号">
+        </div>
+        <div class="input-group">
+            <label class="input-label">验证码</label>
+            <input type="text" class="input-field" placeholder="请输入验证码">
+        </div>
+        <button class="login-btn">登录 / 注册</button>
+        
+        <div class="divider"><span>或</span></div>
+        
+        <div class="social-login">
+            <button class="social-btn">🍎</button>
+            <button class="social-btn">🌐</button>
+        </div>
+    </div>
+    
+    <div class="footer-links">
+        登录即表示同意 <a href="#">《用户协议》</a> 和 <a href="#">《隐私政策》</a>
+    </div>
+</body>
+</html>

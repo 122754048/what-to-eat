@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>我的 - 吃什么</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', sans-serif;
+            background: #F8F8F8;
+            max-width: 430px;
+            margin: 0 auto;
+            padding-bottom: 100px;
+        }
+        .status-bar {
+            height: 47px;
+            background: #FFFFFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 20px;
+        }
+        .status-bar-time {
+            font-size: 15px;
+            font-weight: 600;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #7CB97D 0%, #9ED89E 100%);
+            padding: 60px 20px 40px;
+            color: white;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            border: 3px solid rgba(255,255,255,0.5);
+        }
+        .user-details {
+            flex: 1;
+        }
+        .user-name {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .member-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.25);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .member-card {
+            background: white;
+            margin: -20px 16px 16px;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        .member-card-title {
+            font-size: 14px;
+            color: #8E8E93;
+            margin-bottom: 8px;
+        }
+        .member-card-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .member-status {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2D2D2D;
+        }
+        .member-expiry {
+            font-size: 13px;
+            color: #8E8E93;
+            margin-top: 4px;
+        }
+        .member-cta {
+            background: linear-gradient(135deg, #7CB97D, #5FA85F);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .menu-section {
+            background: white;
+            margin: 16px;
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 0.5px solid #F0F0F0;
+        }
+        .menu-item:last-child {
+            border-bottom: none;
+        }
+        .menu-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: #F8F8F8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 14px;
+            font-size: 18px;
+        }
+        .menu-icon.red { background: #FFEBEB; }
+        .menu-icon.blue { background: #E8F4FF; }
+        .menu-icon.orange { background: #FFF4E8; }
+        .menu-icon.green { background: #E8F8EB; }
+        .menu-text {
+            flex: 1;
+            font-size: 16px;
+            color: #2D2D2D;
+        }
+        .menu-arrow {
+            color: #C7C7CC;
+            font-size: 18px;
+        }
+        .logout-btn {
+            display: block;
+            margin: 24px 16px;
+            padding: 14px;
+            background: white;
+            border-radius: 12px;
+            text-align: center;
+            color: #FF3B30;
+            font-size: 16px;
+            font-weight: 500;
+        }
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 430px;
+            height: 83px;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid #E5E5E5;
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-start;
+            padding-top: 8px;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: #8E8E93;
+            font-size: 10px;
+        }
+        .tab-item.active {
+            color: #7CB97D;
+        }
+        .tab-icon {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="status-bar">
+        <span class="status-bar-time">9:41</span>
+    </div>
+    
+    <div class="profile-header">
+        <div class="user-info">
+            <div class="avatar">👤</div>
+            <div class="user-details">
+                <div class="user-name">小明</div>
+                <div class="member-badge">👑 Premium会员</div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="member-card">
+        <div class="member-card-title">会员状态</div>
+        <div class="member-card-content">
+            <div>
+                <div class="member-status">Premium 会员</div>
+                <div class="member-expiry">到期: 2026-12-31</div>
+            </div>
+            <div class="member-cta">续费</div>
+        </div>
+    </div>
+    
+    <div class="menu-section">
+        <div class="menu-item">
+            <div class="menu-icon red">❤️</div>
+            <span class="menu-text">我的收藏</span>
+            <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon blue">🕐</div>
+            <span class="menu-text">历史记录</span>
+            <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon orange">⚙️</div>
+            <span class="menu-text">设置</span>
+            <span class="menu-arrow">›</span>
+        </div>
+        <div class="menu-item">
+            <div class="menu-icon green">❓</div>
+            <span class="menu-text">帮助与反馈</span>
+            <span class="menu-arrow">›</span>
+        </div>
+    </div>
+    
+    <div class="logout-btn">退出登录</div>
+    
+    <div class="tab-bar">
+        <div class="tab-item">
+            <span class="tab-icon">🏠</span>
+            <span>首页</span>
+        </div>
+        <div class="tab-item">
+            <span class="tab-icon">🔍</span>
+            <span>发现</span>
+        </div>
+        <div class="tab-item active">
+            <span class="tab-icon">👤</span>
+            <span>我的</span>
+        </div>
+    </div>
+</body>
+</html>

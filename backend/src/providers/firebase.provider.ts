@@ -1,16 +1,48 @@
 /**
  * Firebase Firestore Provider
- * 使用 Firebase Admin SDK，通过服务账号 JSON 初始化
- *
- * V3 版本：从 Cloudflare D1 → Firebase Firestore
+ * 支持自动降级到 Mock 数据（无 Firebase 凭证时）
  *
  * 使用方式：
- * 1. 下载 Firebase 服务账号 JSON（项目设置 → 服务账号 → 生成私钥）
- * 2. 将 JSON 内容设置为环境变量 FIREBASE_SERVICE_ACCOUNT
- *    或保存为 google-service-account.json 文件
+ * 1. Firebase 模式：设置 FIREBASE_SERVICE_ACCOUNT 环境变量 或放置 google-service-account.json
+ * 2. Mock 模式：无凭证时自动降级，使用本地 Mock 数据
  */
 
 import * as admin from 'firebase-admin';
+import {
+  getCuisinesByMock,
+  getCuisineByIdMock,
+  getDishesByMock,
+  getDishByIdMock,
+  getRandomDishByCuisineMock,
+  insertHistoryMock,
+  getHistoryMock,
+  getHistoryCountMock,
+  updateFeedbackMock,
+  getExcludedDishesMock,
+  addExcludedDishMock,
+} from './mock.provider';
+
+// ============ 凭证检测 ============
+
+function hasFirebaseCredentials(): boolean {
+  const envJson = process.env.FIREBASE_SERVICE_ACCOUNT;
+  if (envJson) {
+    try {
+      JSON.parse(envJson);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+  try {
+    require('./google-service-account.json');
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const USE_MOCK = !hasFirebaseCredentials();
 
 // 懒加载初始化
 let db: admin.firestore.Firestore | null = null;
@@ -18,101 +50,86 @@ let db: admin.firestore.Firestore | null = null;
 function getDb(): admin.firestore.Firestore {
   if (db) return db;
 
-  // 方式1: 环境变量 FIREBASE_SERVICE_ACCOUNT（JSON字符串）
+  if (!hasFirebaseCredentials()) {
+    throw new Error('No Firebase credentials');
+  }
+
   const envJson = process.env.FIREBASE_SERVICE_ACCOUNT;
   if (envJson) {
     const serviceAccount = JSON.parse(envJson);
     if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
+      admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
     }
     db = admin.firestore();
     return db;
   }
 
-  // 方式2: 文件 google-service-account.json
   try {
     const serviceAccount = require('./google-service-account.json');
     if (!admin.apps.length) {
-      admin.initializeApp({
-        credential: admin.credential.cert(serviceAccount),
-      });
+      admin.initializeApp({ credential: admin.credential.cert(serviceAccount) });
     }
     db = admin.firestore();
     return db;
   } catch {
-    throw new Error(
-      'Firebase 未初始化。请设置 FIREBASE_SERVICE_ACCOUNT 环境变量，或放置 google-service-account.json 文件。'
-    );
+    throw new Error('No Firebase credentials');
   }
 }
 
 // ============ 菜系操作 ============
 
 export async function getCuisinesByFirestore() {
+  if (USE_MOCK) return getCuisinesByMock();
   const db = getDb();
   const snapshot = await db.collection('cuisines').orderBy('dishCount', 'desc').get();
   return snapshot.docs.map((doc) => doc.data());
 }
 
 export async function getCuisineByIdFirestore(id: string) {
+  if (USE_MOCK) return getCuisineByIdMock(id);
   const db = getDb();
   const doc = await db.collection('cuisines').doc(id).get();
   return doc.exists ? doc.data() : null;
 }
 
-export async function getRandomDishByCuisineFirestore(
-  cuisineId: string,
-  excludeIds: string[] = []
-) {
-  const db = getDb();
-  let query: admin.firestore.Query = db.collection('dishes').where('cuisineId', '==', cuisineId);
-
-  if (excludeIds.length > 0) {
-    query = query.where('id', 'not-in', excludeIds.slice(0, 10));
-  }
-
-  const snapshot = await query.limit(10).get();
-  if (snapshot.empty) return null;
-
-  const docs = snapshot.docs;
-  const randomDoc = docs[Math.floor(Math.random() * docs.length)];
-  return { id: randomDoc.id, ...randomDoc.data() };
-}
+// ============ 菜品操作 ============
 
 export async function getDishByIdFirestore(id: string) {
+  if (USE_MOCK) return getDishByIdMock(id);
   const db = getDb();
   const doc = await db.collection('dishes').doc(id).get();
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
+export async function getRandomDishByCuisineFirestore(cuisineId: string, excludeIds: string[] = []) {
+  if (USE_MOCK) return getRandomDishByCuisineMock(cuisineId, excludeIds);
+  const db = getDb();
+  let query: admin.firestore.Query = db.collection('dishes').where('cuisineId', '==', cuisineId);
+  if (excludeIds.length > 0) {
+    query = query.where('id', 'not-in', excludeIds.slice(0, 10));
+  }
+  const snapshot = await query.limit(10).get();
+  if (snapshot.empty) return null;
+  const docs = snapshot.docs;
+  const randomDoc = docs[Math.floor(Math.random() * docs.length)];
+  return { id: randomDoc.id, ...randomDoc.data() };
+}
+
 // ============ 历史记录操作 ============
 
-export async function insertHistoryFirestore(
-  userId: string,
-  dishId: string,
-  cuisineId: string
-) {
+export async function insertHistoryFirestore(userId: string, dishId: string, cuisineId: string) {
+  if (USE_MOCK) return insertHistoryMock(userId, dishId, cuisineId);
   const db = getDb();
   const docRef = await db.collection('recommendationHistory').add({
-    userId,
-    dishId,
-    cuisineId,
-    recommendedAt: Date.now(),
-    liked: 0,
+    userId, dishId, cuisineId, recommendedAt: Date.now(), liked: 0,
   });
   return docRef.id;
 }
 
-export async function getHistoryFirestore(
-  userId: string,
-  page: number,
-  pageSize: number
-) {
+export async function getHistoryFirestore(userId: string, page: number, pageSize: number) {
+  if (USE_MOCK) return getHistoryMock(userId, page, pageSize);
   const db = getDb();
   const offset = (page - 1) * pageSize;
-
   const snapshot = await db
     .collection('recommendationHistory')
     .where('userId', '==', userId)
@@ -120,16 +137,10 @@ export async function getHistoryFirestore(
     .offset(offset)
     .limit(pageSize)
     .get();
-
-  const docs = snapshot.docs;
-
-  // 获取菜系和菜品名称
   const items = await Promise.all(
-    docs.map(async (doc) => {
+    snapshot.docs.map(async (doc) => {
       const data = doc.data();
-      let dishName = '';
-      let cuisineName = '';
-
+      let dishName = '', cuisineName = '';
       try {
         const dishDoc = await db.collection('dishes').doc(data.dishId).get();
         if (dishDoc.exists) {
@@ -141,95 +152,66 @@ export async function getHistoryFirestore(
           }
         }
       } catch { /* ignore */ }
-
-      return {
-        id: doc.id,
-        dishId: data.dishId,
-        dishName,
-        cuisineName,
-        recommendedAt: data.recommendedAt,
-        liked: data.liked ?? 0,
-      };
+      return { id: doc.id, dishId: data.dishId, dishName, cuisineName, recommendedAt: data.recommendedAt, liked: data.liked ?? 0 };
     })
   );
-
   return items;
 }
 
 export async function getHistoryCountFirestore(userId: string) {
+  if (USE_MOCK) return getHistoryCountMock(userId);
   const db = getDb();
-  const snapshot = await db
-    .collection('recommendationHistory')
-    .where('userId', '==', userId)
-    .count()
-    .get();
+  const snapshot = await db.collection('recommendationHistory').where('userId', '==', userId).count().get();
   return snapshot.data().count;
 }
 
 export async function updateFeedbackFirestore(historyId: string, liked: number) {
+  if (USE_MOCK) { updateFeedbackMock(historyId, liked); return; }
   const db = getDb();
   await db.collection('recommendationHistory').doc(historyId).update({ liked });
 }
 
 export async function getHistoryByIdFirestore(historyId: string) {
+  if (USE_MOCK) return null;
   const db = getDb();
   const doc = await db.collection('recommendationHistory').doc(historyId).get();
   return doc.exists ? { id: doc.id, ...doc.data() } : null;
 }
 
-// ============ 会话去重（Firestore 文档）============
+// ============ 会话去重 ============
 
-const SESSION_EXCLUSION_PREFIX = 'session_exclusion:';
-const SESSION_TTL_MS = 24 * 60 * 60 * 1000; // 24小时
+const SESSION_TTL_MS = 24 * 60 * 60 * 1000;
 
 export async function getExcludedDishesFirestore(userId: string): Promise<string[]> {
+  if (USE_MOCK) return getExcludedDishesMock(userId);
   const db = getDb();
-  const docId = `${SESSION_EXCLUSION_PREFIX}${userId}`;
+  const docId = `session_exclusion:${userId}`;
   const doc = await db.collection('sessionData').doc(docId).get();
-
   if (!doc.exists) return [];
-
   const data = doc.data()!;
-  const expiresAt = data.expiresAt;
-
-  if (Date.now() > expiresAt) {
-    // 已过期，删除
-    await doc.ref.delete();
-    return [];
-  }
-
+  if (Date.now() > data.expiresAt) { await doc.ref.delete(); return []; }
   return data.dishIds ?? [];
 }
 
 export async function addExcludedDishFirestore(userId: string, dishId: string): Promise<void> {
+  if (USE_MOCK) { addExcludedDishMock(userId, dishId); return; }
   const db = getDb();
-  const docId = `${SESSION_EXCLUSION_PREFIX}${userId}`;
+  const docId = `session_exclusion:${userId}`;
   const doc = await db.collection('sessionData').doc(docId).get();
-
   let existing: string[] = [];
   if (doc.exists) {
     const data = doc.data()!;
-    if (Date.now() <= data.expiresAt) {
-      existing = data.dishIds ?? [];
-    }
+    if (Date.now() <= data.expiresAt) existing = data.dishIds ?? [];
   }
-
-  if (!existing.includes(dishId)) {
-    existing.push(dishId);
-  }
-
-  await db.collection('sessionData').doc(docId).set({
-    dishIds: existing,
-    expiresAt: Date.now() + SESSION_TTL_MS,
-  });
+  if (!existing.includes(dishId)) existing.push(dishId);
+  await db.collection('sessionData').doc(docId).set({ dishIds: existing, expiresAt: Date.now() + SESSION_TTL_MS });
 }
 
-// ============ 种子数据导入 ============
+// ============ 种子数据（Mock 直接返回成功）============
 
 export async function seedDataFirestore() {
+  if (USE_MOCK) return { cuisines: 8, dishes: 10, note: 'Mock mode - no actual data written' };
   const db = getDb();
-
-  // 菜系
   const cuisines = [
     { id: 'chinese_sichuan', name: '川菜', nameEn: 'Sichuan', iconUrl: 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe3?w=200', coverImageUrl: 'https://images.unsplash.com/photo-1584269600464-37b1b58a9fe3?w=800', tags: ['辣', '麻辣', '经典'], dishCount: 28 },
     { id: 'chinese_cantonese', name: '粤菜', nameEn: 'Cantonese', iconUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=200', coverImageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800', tags: ['清淡', '鲜嫩', '养生'], dishCount: 24 },
@@ -237,12 +219,7 @@ export async function seedDataFirestore() {
     { id: 'chinese_shandong', name: '鲁菜', nameEn: 'Shandong', iconUrl: 'https://images.unsplash.com/photo-1571867424488-4565932edb41?w=200', coverImageUrl: 'https://images.unsplash.com/photo-1571867424488-4565932edb41?w=800', tags: ['鲜香', '咸鲜', '清淡'], dishCount: 18 },
     { id: 'chinese_jiangsu', name: '苏菜', nameEn: 'Jiangsu', iconUrl: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=200', coverImageUrl: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=800', tags: ['清淡', '甜', '精致'], dishCount: 22 },
   ];
-
-  for (const c of cuisines) {
-    await db.collection('cuisines').doc(c.id).set(c);
-  }
-
-  // 菜品
+  for (const c of cuisines) await db.collection('cuisines').doc(c.id).set(c);
   const dishes = [
     { id: 'dish_kungpao_chicken', cuisineId: 'chinese_sichuan', name: '宫保鸡丁', imageUrl: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=800', thumbnailUrl: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=200', caloriesMin: 250, caloriesMax: 350, caloriesUnit: 'kcal', tags: ['经典', '下饭', '微辣'], difficulty: '简单', cookTime: '25分钟', aiRecommendation: '经典川菜代表，花生与鸡丁的完美碰撞！' },
     { id: 'dish_mapo_tofu', cuisineId: 'chinese_sichuan', name: '麻婆豆腐', imageUrl: 'https://images.unsplash.com/photo-1582576163090-09d3b1259f30?w=800', thumbnailUrl: 'https://images.unsplash.com/photo-1582576163090-09d3b1259f30?w=200', caloriesMin: 180, caloriesMax: 280, caloriesUnit: 'kcal', tags: ['经典', '麻辣', '下饭'], difficulty: '简单', cookTime: '20分钟', aiRecommendation: '川菜经典，豆腐嫩滑，麻辣鲜香！' },
@@ -255,10 +232,6 @@ export async function seedDataFirestore() {
     { id: 'dish_squirrel_fish', cuisineId: 'chinese_jiangsu', name: '松鼠桂鱼', imageUrl: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=800', thumbnailUrl: 'https://images.unsplash.com/photo-1611143669185-af224c5e3252?w=200', caloriesMin: 220, caloriesMax: 320, caloriesUnit: 'kcal', tags: ['经典', '酸甜', '造型独特'], difficulty: '较难', cookTime: '50分钟', aiRecommendation: '苏菜代表作，外酥里嫩，酸甜可口！' },
     { id: 'dish_yangzhou_fried_rice', cuisineId: 'chinese_jiangsu', name: '扬州炒饭', imageUrl: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800', thumbnailUrl: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=200', caloriesMin: 300, caloriesMax: 400, caloriesUnit: 'kcal', tags: ['经典', '主食', '丰盛'], difficulty: '简单', cookTime: '20分钟', aiRecommendation: '米饭粒粒分明，配料丰富，一碗也是盛宴！' },
   ];
-
-  for (const d of dishes) {
-    await db.collection('dishes').doc(d.id).set(d);
-  }
-
+  for (const d of dishes) await db.collection('dishes').doc(d.id).set(d);
   return { cuisines: cuisines.length, dishes: dishes.length };
 }

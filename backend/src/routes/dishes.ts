@@ -9,9 +9,9 @@ import { error, ErrorCodes } from '../utils/response';
 export const dishesRouter = new Hono();
 
 /**
- * GET /dishes/:dishId - 获取菜品详情
+ * GET /:dishId - 获取菜品详情
  */
-dishesRouter.get('/dishes/:dishId', async (c) => {
+dishesRouter.get('/:dishId', async (c) => {
   const dishId = c.req.param('dishId');
 
   const dish = await getDishDetail(dishId);

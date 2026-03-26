@@ -11,7 +11,7 @@ export const historyRouter = new Hono();
 /**
  * GET /history - 获取推荐历史
  */
-historyRouter.get('/history', async (c) => {
+historyRouter.get('/', async (c) => {
   const userId = c.req.header('X-User-ID') ?? 'anonymous';
   const page = Math.max(1, parseInt(c.req.query('page') ?? '1', 10));
   const pageSize = Math.min(Math.max(1, parseInt(c.req.query('pageSize') ?? '20', 10)), 100);
@@ -21,10 +21,9 @@ historyRouter.get('/history', async (c) => {
 });
 
 /**
- * POST /history/:historyId/feedback - 反馈推荐结果
- * 注意：Firestore 使用字符串 ID
+ * POST /:historyId/feedback - 反馈推荐结果
  */
-historyRouter.post('/history/:historyId/feedback', async (c) => {
+historyRouter.post('/:historyId/feedback', async (c) => {
   const historyId = c.req.param('historyId');
   const userId = c.req.header('X-User-ID') ?? 'anonymous';
   const body = await c.req.json().catch(() => null);
