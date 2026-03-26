@@ -2,26 +2,28 @@
  * AI菜品生成服务
  * @module services/ai-dish.service
  *
- * V2.0：Mock优先，真实AI等凭证到位后切换
+ * V2.0 Phase 1：Mock优先，支持 mealContext + allergies
+ * 响应格式：{ name, reason, calories, pairings, imageUrl }
  */
 export interface GenerateDishInput {
   cuisineId: string;
-  dietaryRestrictions?: string[]; // 忌口
-  mood?: string;                 // 心情
+  mealContext?: string;      // 餐食场景：早餐/午餐/晚餐/夜宵
+  allergies?: string[];      // 过敏原：虾/花生/乳制品等
+}
+
+export interface DishPairings {
+  dishes: string[];   // 配菜
+  drinks: string[];   // 饮品
 }
 
 export interface GeneratedDish {
   name: string;
-  cuisineId: string;
-  cuisineName: string;
-  description: string;
-  ingredients: string[];
-  cookTime: string;
-  difficulty: string;
-  imagePrompt: string;   // AI图片生成prompt
-  calories: { min: number; max: number; unit: string };
-  tags: string[];
-  dietaryNote?: string; // 适配忌口的说明
+  reason: string;          // AI推荐理由
+  calories: string;       // 格式 "300-400"
+  pairings: DishPairings;  // 搭配推荐
+  imageUrl: string;
+  allergies?: string[];    // 常见过敏原（内部使用）
+  dietaryNote?: string;   // 饮食说明（内部使用）
 }
 
 // 菜系名称映射
@@ -46,352 +48,322 @@ const CUISINE_NAMES: Record<string, string> = {
   default: '创意菜',
 };
 
-// Mock菜品库（按菜系分类）
+// 饮品库
+const DRINKS: Record<string, string[]> = {
+  辣: ['柠檬茶', '酸梅汤', '凉茶', '冰可乐'],
+  麻辣: ['酸梅汤', '柠檬茶', '椰汁'],
+  酸辣: ['酸梅汤', '柠檬水', '蜂蜜水'],
+  清淡: ['柠檬水', '菊花茶', '绿茶', '椰汁'],
+  甜: ['柠檬水', '绿茶', '茉莉花茶'],
+  鲜: ['柠檬水', '菊花茶', '苏打水'],
+  养生: ['枸杞茶', '红枣茶', '绿茶', '山楂茶'],
+  default: ['柠檬水', '绿茶', '苏打水'],
+};
+
+// 配菜库（按场景）
+const PAIRING_DISHES: Record<string, string[]> = {
+  早餐: ['白粥', '豆浆', '油条', '小笼包'],
+  午餐: ['米饭', '馒头', '面条'],
+  晚餐: ['米饭', '粥', '杂粮饭'],
+  夜宵: ['啤酒', '饮料', '小吃'],
+  default: ['米饭', '粥', '面条'],
+};
+
+// Mock菜品库
 const MOCK_DISHES: Record<string, GeneratedDish[]> = {
   chinese_sichuan: [
     {
       name: '水煮牛肉',
-      cuisineId: 'chinese_sichuan',
-      cuisineName: '川菜',
-      description: '麻辣鲜香，牛肉嫩滑，热油激香',
-      ingredients: ['牛肉片', '豆芽', '莴笋', '花椒', '干辣椒', '郫县豆瓣'],
-      cookTime: '25分钟',
-      difficulty: '中等',
-      imagePrompt: '水煮牛肉，麻辣四川菜，红油汤底，牛肉片配蔬菜',
-      calories: { min: 300, max: 400, unit: 'kcal' },
-      tags: ['辣', '下饭', '经典'],
+      reason: '麻辣鲜香，牛肉嫩滑，热油激香，保证让你胃口大开！',
+      calories: '300-400',
+      pairings: { dishes: ['米饭'], drinks: ['酸梅汤', '柠檬茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1581291518857-4e27b48ff24e?w=800',
     },
     {
       name: '酸菜鱼',
-      cuisineId: 'chinese_sichuan',
-      cuisineName: '川菜',
-      description: '酸辣开胃，鱼肉鲜嫩，汤汁浓郁',
-      ingredients: ['黑鱼片', '酸菜', '泡椒', '豆芽', '粉丝'],
-      cookTime: '20分钟',
-      difficulty: '简单',
-      imagePrompt: '酸菜鱼，川菜，酸辣口味，鱼片配酸菜',
-      calories: { min: 200, max: 300, unit: 'kcal' },
-      tags: ['酸辣', '开胃', '低脂'],
+      reason: '酸辣开胃，鱼肉鲜嫩，汤汁浓郁，吃一口就爱上！',
+      calories: '200-300',
+      pairings: { dishes: ['米饭'], drinks: ['酸梅汤', '凉茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800',
     },
     {
       name: '干煸四季豆',
-      cuisineId: 'chinese_sichuan',
-      cuisineName: '川菜',
-      description: '干香入味，四季豆脆嫩，下饭神器',
-      ingredients: ['四季豆', '肉末', '干辣椒', '花椒', '蒜末'],
-      cookTime: '15分钟',
-      difficulty: '简单',
-      imagePrompt: '干煸四季豆，川菜，干辣椒肉末炒四季豆',
-      calories: { min: 150, max: 200, unit: 'kcal' },
-      tags: ['香辣', '下饭', '素菜'],
-      dietaryNote: '可选不放肉末，做成纯素版本',
+      reason: '干香入味，四季豆脆嫩，下饭神器！',
+      calories: '150-200',
+      pairings: { dishes: ['米饭'], drinks: ['柠檬茶', '绿茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1584278860047-22db9ff82ef6?w=800',
+      allergies: ['虾'], // 四季豆本身无常见过敏原
     },
     {
       name: '回锅肉',
-      cuisineId: 'chinese_sichuan',
-      cuisineName: '川菜',
-      description: '肥而不腻，色泽红亮，蒜香浓郁',
-      ingredients: ['五花肉', '青蒜', '郫县豆瓣', '甜面酱', '花椒'],
-      cookTime: '30分钟',
-      difficulty: '中等',
-      imagePrompt: '回锅肉，川菜经典，蒜苗回锅肉，色泽红亮',
-      calories: { min: 350, max: 450, unit: 'kcal' },
-      tags: ['经典', '下饭', '香辣'],
+      reason: '肥而不腻，色泽红亮，蒜香浓郁，川菜经典！',
+      calories: '350-450',
+      pairings: { dishes: ['米饭', '馒头'], drinks: ['酸梅汤', '绿茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
     },
     {
       name: '宫保鸡丁',
-      cuisineId: 'chinese_sichuan',
-      cuisineName: '川菜',
-      description: '糊辣荔枝口，花生酥脆，鸡丁嫩滑',
-      ingredients: ['鸡胸肉', '花生米', '干辣椒', '花椒', '葱段'],
-      cookTime: '25分钟',
-      difficulty: '简单',
-      imagePrompt: '宫保鸡丁，川菜经典，鸡肉花生辣椒',
-      calories: { min: 250, max: 350, unit: 'kcal' },
-      tags: ['经典', '下饭', '微辣'],
+      reason: '糊辣荔枝口，花生酥脆，鸡丁嫩滑，经典中的经典！',
+      calories: '250-350',
+      pairings: { dishes: ['米饭'], drinks: ['柠檬茶', '酸梅汤'] },
+      imageUrl: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?w=800',
+      allergies: ['花生'],
+    },
+    {
+      name: '麻婆豆腐',
+      reason: '川菜经典，豆腐嫩滑，麻辣鲜香，下饭神器！',
+      calories: '180-280',
+      pairings: { dishes: ['米饭'], drinks: ['酸梅汤', '豆浆'] },
+      imageUrl: 'https://images.unsplash.com/photo-1582576163090-09d3b1259f30?w=800',
+      allergies: ['大豆'],
+    },
+    {
+      name: '鱼香肉丝',
+      reason: '酸甜咸辣鲜五味俱全，开胃下饭，口感丰富！',
+      calories: '280-380',
+      pairings: { dishes: ['米饭'], drinks: ['柠檬茶', '酸梅汤'] },
+      imageUrl: 'https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?w=800',
+    },
+    {
+      name: '辣子鸡',
+      reason: '干辣椒段炸至香脆，鸡肉外酥里嫩，辣得过瘾！',
+      calories: '300-400',
+      pairings: { dishes: ['米饭'], drinks: ['酸梅汤', '冰可乐'] },
+      imageUrl: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=800',
     },
   ],
   chinese_cantonese: [
     {
       name: '白切鸡',
-      cuisineId: 'chinese_cantonese',
-      cuisineName: '粤菜',
-      description: '皮爽肉滑，原汁原味，姜葱酱料绝配',
-      ingredients: ['三黄鸡', '姜', '葱', '沙姜', '花生油'],
-      cookTime: '40分钟',
-      difficulty: '中等',
-      imagePrompt: '白切鸡，粤菜经典，皮黄肉嫩，配姜葱酱',
-      calories: { min: 200, max: 280, unit: 'kcal' },
-      tags: ['清淡', '鲜美', '经典'],
+      reason: '皮爽肉滑，原汁原味，姜葱酱料绝配，粤菜灵魂！',
+      calories: '200-280',
+      pairings: { dishes: ['米饭', '白粥'], drinks: ['枸杞茶', '椰汁'] },
+      imageUrl: 'https://images.unsplash.com/photo-1563245372-f21724e3856d?w=800',
     },
     {
       name: '清蒸石斑',
-      cuisineId: 'chinese_cantonese',
-      cuisineName: '粤菜',
-      description: '鱼肉鲜嫩，清淡少油，保留海鲜原味',
-      ingredients: ['石斑鱼', '葱丝', '姜丝', '蒸鱼豉油', '热油'],
-      cookTime: '15分钟',
-      difficulty: '简单',
-      imagePrompt: '清蒸石斑鱼，粤菜，葱姜铺面，鲜嫩白皙',
-      calories: { min: 120, max: 180, unit: 'kcal' },
-      tags: ['清淡', '养生', '海鲜'],
+      reason: '鱼肉鲜嫩，清淡少油，保留海鲜原味，养生首选！',
+      calories: '120-180',
+      pairings: { dishes: ['米饭'], drinks: ['柠檬水', '菊花茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1580048915913-4f8f5cb481c4?w=800',
+      allergies: ['鱼'],
     },
     {
       name: '叉烧肉',
-      cuisineId: 'chinese_cantonese',
-      cuisineName: '粤菜',
-      description: '外焦里嫩，甜香四溢，港式经典',
-      ingredients: ['梅花肉', '叉烧酱', '蜂蜜', '红曲粉'],
-      cookTime: '40分钟',
-      difficulty: '中等',
-      imagePrompt: '叉烧肉，粤菜港式，色泽红亮，蜜汁叉烧',
-      calories: { min: 280, max: 380, unit: 'kcal' },
-      tags: ['甜香', '经典', '下饭'],
+      reason: '外焦里嫩，甜香四溢，港式经典，一口就爱上！',
+      calories: '280-380',
+      pairings: { dishes: ['米饭', '面条'], drinks: ['柠檬茶', '奶茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=800',
+      allergies: ['大豆'],
     },
     {
       name: '上汤娃娃菜',
-      cuisineId: 'chinese_cantonese',
-      cuisineName: '粤菜',
-      description: '汤鲜菜嫩，清淡爽口，老少皆宜',
-      ingredients: ['娃娃菜', '皮蛋', '咸蛋', '火腿', '高汤'],
-      cookTime: '15分钟',
-      difficulty: '简单',
-      imagePrompt: '上汤娃娃菜，粤菜，清淡汤菜，绿色蔬菜',
-      calories: { min: 80, max: 120, unit: 'kcal' },
-      tags: ['清淡', '养生', '素菜'],
+      reason: '汤鲜菜嫩，清淡爽口，老少皆宜，健康之选！',
+      calories: '80-120',
+      pairings: { dishes: ['米饭', '粥'], drinks: ['菊花茶', '柠檬水'] },
+      imageUrl: 'https://images.unsplash.com/photo-1571867424488-4565932edb41?w=800',
       dietaryNote: '低脂低热量，适合减脂人群',
     },
     {
-      name: '豉汁蒸排骨',
-      cuisineId: 'chinese_cantonese',
-      cuisineName: '粤菜',
-      description: '豆豉香浓，排骨软糯，蒸制更健康',
-      ingredients: ['猪肋排', '豆豉', '蒜末', '生抽', '糖'],
-      cookTime: '35分钟',
-      difficulty: '中等',
-      imagePrompt: '豉汁蒸排骨，粤菜，豆豉排骨，软糯入味',
-      calories: { min: 250, max: 350, unit: 'kcal' },
-      tags: ['鲜香', '蒸菜', '经典'],
+      name: '煲仔饭',
+      reason: '米饭香糯，锅巴酥脆，腊味十足，一锅满足！',
+      calories: '400-500',
+      pairings: { dishes: [], drinks: ['柠檬茶', '咸柠七'] },
+      imageUrl: 'https://images.unsplash.com/photo-1512058564366-18510be2db19?w=800',
     },
   ],
   chinese_hunan: [
     {
       name: '剁椒鱼头',
-      cuisineId: 'chinese_hunan',
-      cuisineName: '湘菜',
-      description: '剁椒铺满鱼头，鲜辣过瘾，汤汁拌面一绝',
-      ingredients: ['鳙鱼头', '剁椒', '豆豉', '葱姜', '料酒'],
-      cookTime: '20分钟',
-      difficulty: '简单',
-      imagePrompt: '剁椒鱼头，湘菜经典，红剁椒铺面，鲜辣',
-      calories: { min: 200, max: 300, unit: 'kcal' },
-      tags: ['辣', '开胃', '经典'],
+      reason: '剁椒铺满鱼头，鲜辣过瘾，汤汁拌面一绝！',
+      calories: '200-300',
+      pairings: { dishes: ['面条', '米饭'], drinks: ['酸梅汤', '凉茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1569058242567-93de6f36f8eb?w=800',
+      allergies: ['鱼'],
     },
     {
       name: '小炒黄牛肉',
-      cuisineId: 'chinese_hunan',
-      cuisineName: '湘菜',
-      description: '猛火爆炒，牛肉嫩滑，泡椒提味',
-      ingredients: ['黄牛肉', '泡椒', '小米辣', '香菜', '蒜片'],
-      cookTime: '10分钟',
-      difficulty: '简单',
-      imagePrompt: '小炒黄牛肉，湘菜，泡椒牛肉，麻辣鲜香',
-      calories: { min: 200, max: 280, unit: 'kcal' },
-      tags: ['辣', '下饭', '快手'],
+      reason: '猛火爆炒，牛肉嫩滑，泡椒提味，下饭神器！',
+      calories: '200-280',
+      pairings: { dishes: ['米饭'], drinks: ['酸梅汤', '冰可乐'] },
+      imageUrl: 'https://images.unsplash.com/photo-1555126634-323283e090fa?w=800',
+      allergies: ['鱼'],
     },
     {
       name: '毛氏红烧肉',
-      cuisineId: 'chinese_hunan',
-      cuisineName: '湘菜',
-      description: '色泽红亮，肥而不腻，入口即化',
-      ingredients: ['五花肉', '冰糖', '八角', '桂皮', '生抽'],
-      cookTime: '60分钟',
-      difficulty: '中等',
-      imagePrompt: '毛氏红烧肉，湘菜经典，红烧肉色泽红亮',
-      calories: { min: 400, max: 500, unit: 'kcal' },
-      tags: ['经典', '软糯', '下饭'],
+      reason: '色泽红亮，肥而不腻，入口即化，湘菜之王！',
+      calories: '400-500',
+      pairings: { dishes: ['米饭', '馒头'], drinks: ['酸梅汤', '绿茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1623689046286-adcf6bc93a5b?w=800',
     },
     {
       name: '腊味合蒸',
-      cuisineId: 'chinese_hunan',
-      cuisineName: '湘菜',
-      description: '腊肉腊肠同蒸，香味交融，下饭绝佳',
-      ingredients: ['腊肉', '腊肠', '豆豉', '干辣椒', '蒜'],
-      cookTime: '25分钟',
-      difficulty: '简单',
-      imagePrompt: '腊味合蒸，湘菜，腊肉腊肠蒸制，咸香',
-      calories: { min: 300, max: 400, unit: 'kcal' },
-      tags: ['咸香', '下饭', '传统'],
+      reason: '腊肉腊肠同蒸，香味交融，下饭绝佳！',
+      calories: '300-400',
+      pairings: { dishes: ['米饭'], drinks: ['绿茶', '咸柠七'] },
+      imageUrl: 'https://images.unsplash.com/photo-1587559335512-43745bfb5c87?w=800',
     },
   ],
   healthy: [
     {
       name: '藜麦鸡胸沙拉',
-      cuisineId: 'healthy',
-      cuisineName: '健康餐',
-      description: '高蛋白低脂肪，藜麦饱腹，鸡胸肉嫩滑',
-      ingredients: ['藜麦', '鸡胸肉', '牛油果', '小番茄', '苦苣'],
-      cookTime: '20分钟',
-      difficulty: '简单',
-      imagePrompt: '藜麦鸡胸肉沙拉，健康餐，五彩蔬菜鸡胸',
-      calories: { min: 350, max: 450, unit: 'kcal' },
-      tags: ['低脂', '高蛋白', '减脂'],
-      dietaryNote: '适合减脂人群，高蛋白低脂肪',
+      reason: '高蛋白低脂肪，藜麦饱腹，鸡胸肉嫩滑，减脂必备！',
+      calories: '350-450',
+      pairings: { dishes: [], drinks: ['柠檬水', '黑咖啡'] },
+      imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+      allergies: ['鸡蛋'],
     },
     {
       name: '西兰花虾仁',
-      cuisineId: 'healthy',
-      cuisineName: '健康餐',
-      description: '清炒少油，虾仁Q弹，西兰花脆嫩',
-      ingredients: ['西兰花', '虾仁', '蒜末', '橄榄油', '盐'],
-      cookTime: '10分钟',
-      difficulty: '简单',
-      imagePrompt: '西兰花虾仁，健康餐，清炒虾仁配西兰花',
-      calories: { min: 150, max: 200, unit: 'kcal' },
-      tags: ['低脂', '高蛋白', '快手'],
-      dietaryNote: '少油烹饪，适合减脂',
+      reason: '清炒少油，虾仁Q弹，西兰花脆嫩，低脂高蛋白！',
+      calories: '150-200',
+      pairings: { dishes: ['糙米'], drinks: ['柠檬水', '苏打水'] },
+      imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800',
+      allergies: ['虾'],
     },
     {
       name: '三文鱼牛油果碗',
-      cuisineId: 'healthy',
-      cuisineName: '健康餐',
-      description: 'Omega-3丰富，三文鱼嫩滑，牛油果绵密',
-      ingredients: ['三文鱼', '牛油果', '糙米', '紫甘蓝', '芝麻酱'],
-      cookTime: '25分钟',
-      difficulty: '简单',
-      imagePrompt: '三文鱼牛油果碗，网红健康餐，色彩丰富',
-      calories: { min: 450, max: 550, unit: 'kcal' },
-      tags: ['高蛋白', 'Omega-3', '减脂'],
-      dietaryNote: '优质脂肪来源，适合健身人群',
+      reason: 'Omega-3丰富，三文鱼嫩滑，牛油果绵密，网红健康餐！',
+      calories: '450-550',
+      pairings: { dishes: [], drinks: ['柠檬水', '椰子水'] },
+      imageUrl: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800',
+      allergies: ['鱼'],
     },
     {
       name: '番茄龙利鱼',
-      cuisineId: 'healthy',
-      cuisineName: '健康餐',
-      description: '酸甜开胃，龙利鱼无骨无刺，嫩滑可口',
-      ingredients: ['龙利鱼', '番茄', '金针菇', '番茄酱', '姜丝'],
-      cookTime: '20分钟',
-      difficulty: '简单',
-      imagePrompt: '番茄龙利鱼，健康餐，酸甜番茄汤配嫩滑鱼肉',
-      calories: { min: 180, max: 250, unit: 'kcal' },
-      tags: ['低脂', '高蛋白', '清淡'],
-      dietaryNote: '龙利鱼无刺，适合老人小孩',
+      reason: '酸甜开胃，龙利鱼无骨无刺，嫩滑可口，老少皆宜！',
+      calories: '180-250',
+      pairings: { dishes: ['糙米'], drinks: ['柠檬水', '菊花茶'] },
+      imageUrl: 'https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=800',
+      allergies: ['鱼'],
+    },
+    {
+      name: '鸡胸肉蔬菜卷',
+      reason: '高蛋白低卡，蔬菜丰富，一张饼搞定一餐！',
+      calories: '300-380',
+      pairings: { dishes: [], drinks: ['黑咖啡', '柠檬水'] },
+      imageUrl: 'https://images.unsplash.com/photo-1525351484163-7529414344d8?w=800',
+      allergies: ['鸡蛋', '小麦'],
     },
   ],
 };
 
-// 默认菜品（未知菜系时使用）
+// 默认菜品
 const DEFAULT_DISHES: GeneratedDish[] = [
   {
     name: '香煎鸡胸肉配蔬菜',
-    cuisineId: 'default',
-    cuisineName: '创意菜',
-    description: '外焦里嫩，营养均衡，健康美味',
-    ingredients: ['鸡胸肉', '西兰花', '胡萝卜', '橄榄油', '黑胡椒'],
-    cookTime: '20分钟',
-    difficulty: '简单',
-    imagePrompt: '香煎鸡胸肉配蔬菜，健康餐盘，色彩丰富',
-    calories: { min: 300, max: 380, unit: 'kcal' },
-    tags: ['健康', '高蛋白', '减脂'],
+    reason: '外焦里嫩，营养均衡，健康美味，健身首选！',
+    calories: '300-380',
+    pairings: { dishes: ['糙米', '藜麦'], drinks: ['柠檬水', '黑咖啡'] },
+    imageUrl: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800',
+    allergies: ['鸡蛋'],
   },
   {
     name: '蒜蓉蒸虾',
-    cuisineId: 'default',
-    cuisineName: '创意菜',
-    description: '蒜香浓郁，虾肉鲜甜，蒸制更健康',
-    ingredients: ['大虾', '蒜末', '葱花', '粉丝', '蒸鱼豉油'],
-    cookTime: '15分钟',
-    difficulty: '简单',
-    imagePrompt: '蒜蓉蒸虾，海鲜，蒜末铺面，鲜嫩大虾',
-    calories: { min: 150, max: 220, unit: 'kcal' },
-    tags: ['海鲜', '低脂', '鲜甜'],
+    reason: '蒜香浓郁，虾肉鲜甜，蒸制更健康，老少皆宜！',
+    calories: '150-220',
+    pairings: { dishes: ['米饭'], drinks: ['柠檬水', '菊花茶'] },
+    imageUrl: 'https://images.unsplash.com/photo-1559847844-5315695dadae?w=800',
+    allergies: ['虾'],
   },
 ];
 
 /**
- * 忌口关键词过滤规则
+ * 过敏原过滤
+ * 如果用户的过敏原与菜品过敏原冲突，返回 null
  */
-const DIETARY_FILTERS: Record<string, (dish: GeneratedDish) => boolean> = {
-  '不辣': (d) => !d.tags.includes('辣') && !d.tags.includes('麻辣') && !d.tags.includes('酸辣'),
-  '少油': (d) => d.calories.max < 350,
-  '清淡': (d) => d.tags.includes('清淡') || d.tags.includes('养生'),
-  '素': (d) => d.dietaryNote?.includes('素') || d.ingredients.every(i => !['肉', '鱼', '虾', '鸡', '猪', '牛', '羊'].some(m => i.includes(m))),
-  '减脂': (d) => d.tags.includes('低脂') || d.tags.includes('减脂'),
-  '低脂': (d) => d.tags.includes('低脂'),
-  '高蛋白': (d) => d.tags.includes('高蛋白'),
-  '无辣': (d) => !d.tags.includes('辣'),
-};
+function filterByAllergies(dish: GeneratedDish, allergies: string[]): GeneratedDish | null {
+  if (!allergies || allergies.length === 0) return dish;
 
-/**
- * 根据忌口过滤菜品
- */
-function filterByDietaryRestrictions(
-  dishes: GeneratedDish[],
-  restrictions: string[]
-): { dish: GeneratedDish; note?: string } {
-  if (restrictions.length === 0) {
-    return { dish: dishes[Math.floor(Math.random() * dishes.length)] };
-  }
-
-  // 尝试找到完全满足的
-  let candidates = dishes;
-  for (const restriction of restrictions) {
-    const filter = DIETARY_FILTERS[restriction];
-    if (filter) {
-      candidates = candidates.filter(filter);
+  const dishAllergens = dish.allergies ?? [];
+  for (const allergy of allergies) {
+    for (const allergen of dishAllergens) {
+      if (allergy.includes(allergen) || allergen.includes(allergy)) {
+        return null;
+      }
     }
   }
+  return dish;
+}
 
-  if (candidates.length > 0) {
-    return { dish: candidates[Math.floor(Math.random() * candidates.length)] };
+/**
+ * 过滤后的随机选择
+ */
+function selectFilteredDish(dishes: GeneratedDish[], allergies: string[]): GeneratedDish {
+  const filtered = dishes.filter(d => filterByAllergies(d, allergies));
+
+  if (filtered.length > 0) {
+    return filtered[Math.floor(Math.random() * filtered.length)];
   }
 
-  // 没找到完全满足的，返回热量最低的并加说明
-  const sortedByCalories = [...dishes].sort((a, b) => a.calories.max - b.calories.max);
+  // 没有找到无过敏的，返回热量最低的
+  return [...dishes].sort((a, b) => {
+    const aMax = parseInt(a.calories.split('-')[1]);
+    const bMax = parseInt(b.calories.split('-')[1]);
+    return aMax - bMax;
+  })[0];
+}
+
+/**
+ * 根据餐食场景调整配菜
+ */
+function adjustPairingsByContext(pairings: DishPairings, mealContext?: string): DishPairings {
+  if (!mealContext) return pairings;
+
+  const contextDishes = PAIRING_DISHES[mealContext] ?? PAIRING_DISHES.default;
+
   return {
-    dish: sortedByCalories[0],
-    note: `注：无法完全满足"${restrictions.join('、')}，已选择最接近的选项`,
+    dishes: pairings.dishes.length > 0 ? pairings.dishes : contextDishes.slice(0, 1),
+    drinks: pairings.drinks,
   };
 }
 
 /**
- * 生成AI菜品
- * V2.0：使用Mock数据，真实AI等凭证到位后切换
+ * 根据心情/场景微调选择
  */
-export async function generateDish(input: GenerateDishInput): Promise<GeneratedDish & { dietaryNote?: string }> {
-  const { cuisineId, dietaryRestrictions = [], mood } = input;
+function selectByMood(dishes: GeneratedDish[], mood?: string): GeneratedDish[] {
+  if (!mood) return dishes;
+
+  if (mood.includes('辣') || mood.includes('重口') || mood.includes('刺激')) {
+    return dishes.filter(d => d.reason.includes('辣') || d.reason.includes('麻辣'));
+  }
+
+  if (mood.includes('清淡') || mood.includes('健康') || mood.includes('养生')) {
+    return dishes.filter(d => d.reason.includes('清淡') || d.reason.includes('养生') || d.reason.includes('健康'));
+  }
+
+  if (mood.includes('快') || mood.includes('简单') || mood.includes('懒')) {
+    return dishes.filter(d => parseInt(d.calories.split('-')[0]) < 250);
+  }
+
+  if (mood.includes('饱') || mood.includes('多') || mood.includes('丰盛')) {
+    return dishes.filter(d => parseInt(d.calories.split('-')[1]) > 350);
+  }
+
+  return dishes;
+}
+
+/**
+ * 生成AI菜品
+ * V2.0 Phase 1：Mock数据，支持 mealContext + allergies
+ */
+export async function generateDish(input: GenerateDishInput): Promise<GeneratedDish> {
+  const { cuisineId, mealContext, allergies = [] } = input;
 
   // 获取菜系菜品库
-  const dishes = MOCK_DISHES[cuisineId] ?? DEFAULT_DISHES;
+  let dishes = MOCK_DISHES[cuisineId] ?? DEFAULT_DISHES;
 
-  // 过滤忌口
-  const { dish, note } = filterByDietaryRestrictions(dishes, dietaryRestrictions);
+  // 根据心情/场景微调
+  dishes = selectByMood(dishes, mealContext);
 
-  // 根据心情微调（简单规则）
-  let finalDish = { ...dish };
-  if (mood) {
-    if (mood.includes('辣') || mood.includes('重口')) {
-      // 选辣的
-      const spicy = dishes.filter(d => d.tags.includes('辣') || d.tags.includes('麻辣'));
-      if (spicy.length > 0) {
-        finalDish = spicy[Math.floor(Math.random() * spicy.length)];
-      }
-    } else if (mood.includes('清淡') || mood.includes('健康')) {
-      // 选清淡的
-      const light = dishes.filter(d => d.tags.includes('清淡') || d.tags.includes('养生'));
-      if (light.length > 0) {
-        finalDish = light[Math.floor(Math.random() * light.length)];
-      }
-    }
-  }
+  // 过滤过敏原
+  let dish = selectFilteredDish(dishes, allergies);
 
-  // 强制使用请求的cuisineId
-  finalDish.cuisineId = cuisineId;
-  finalDish.cuisineName = CUISINE_NAMES[cuisineId] ?? CUISINE_NAMES.default;
+  // 调整搭配
+  const pairings = adjustPairingsByContext(dish.pairings, mealContext);
 
-  if (note) {
-    finalDish.dietaryNote = note;
-  }
-
-  return finalDish;
+  return {
+    ...dish,
+    pairings,
+  };
 }

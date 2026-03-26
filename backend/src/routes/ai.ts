@@ -2,12 +2,11 @@
  * AI 路由
  * @module routes/ai
  *
- * V2.0 新增：AI 动态生成菜品 API
- * 策略：Mock优先，真实AI等凭证到位后切换
+ * V2.0 Phase 1：Mock API，支持 mealContext + allergies
+ * 响应格式：{ name, reason, calories, pairings, imageUrl }
  */
 import { Hono } from 'hono';
 import { generateDish, GenerateDishInput } from '../services/ai-dish.service';
-import { generateReason, GenerateReasonInput } from '../services/ai-reason.service';
 import { error, ErrorCodes } from '../utils/response';
 
 export const aiRouter = new Hono();
@@ -18,8 +17,25 @@ export const aiRouter = new Hono();
  * 请求体：
  * {
  *   "cuisineId": "chinese_sichuan",   // 菜系ID
- *   "dietaryRestrictions": ["不辣", "少油"], // 忌口过滤（可选）
- *   "mood": "想吃辣的"                  // 心情/偏好（可选）
+ *   "mealContext": "午餐",            // 餐食场景（可选）
+ *   "allergies": ["虾", "花生"]       // 过敏原过滤（可选）
+ * }
+ *
+ * 响应：
+ * {
+ *   "code": 0,
+ *   "data": {
+ *     "dish": {
+ *       "name": "宫保鸡丁",
+ *       "reason": "经典川菜代表，麻辣鲜香！",
+ *       "calories": "300-400",
+ *       "pairings": {
+ *         "dishes": ["米饭"],
+ *         "drinks": ["柠檬茶", "酸梅汤"]
+ *       },
+ *       "imageUrl": "https://..."
+ *     }
+ *   }
  * }
  */
 aiRouter.post('/ai/dish', async (c) => {
@@ -31,8 +47,8 @@ aiRouter.post('/ai/dish', async (c) => {
 
   const input: GenerateDishInput = {
     cuisineId: body.cuisineId,
-    dietaryRestrictions: Array.isArray(body.dietaryRestrictions) ? body.dietaryRestrictions : [],
-    mood: typeof body.mood === 'string' ? body.mood : undefined,
+    mealContext: typeof body.mealContext === 'string' ? body.mealContext : undefined,
+    allergies: Array.isArray(body.allergies) ? body.allergies : [],
   };
 
   try {
@@ -52,6 +68,14 @@ aiRouter.post('/ai/dish', async (c) => {
  *   "dishName": "宫保鸡丁",
  *   "cuisineName": "川菜"
  * }
+ *
+ * 响应：
+ * {
+ *   "code": 0,
+ *   "data": {
+ *     "reason": "经典川菜代表，麻辣鲜香！"
+ *   }
+ * }
  */
 aiRouter.post('/ai/reason', async (c) => {
   const body = await c.req.json().catch(() => null);
@@ -60,16 +84,11 @@ aiRouter.post('/ai/reason', async (c) => {
     return c.json(error(ErrorCodes.PARAM_INVALID, 'dishName 不能为空'), 400);
   }
 
-  const input: GenerateReasonInput = {
+  const { generateReason } = await import('../services/ai-reason.service');
+  const reason = await generateReason({
     dishName: body.dishName,
     cuisineName: typeof body.cuisineName === 'string' ? body.cuisineName : undefined,
-  };
+  });
 
-  try {
-    const reason = await generateReason(input);
-    return c.json({ code: 0, message: 'ok', data: { reason } });
-  } catch (err) {
-    console.error('[AI Reason]', err);
-    return c.json(error(ErrorCodes.INTERNAL_ERROR, 'AI生成失败'), 500);
-  }
+  return c.json({ code: 0, message: 'ok', data: { reason } });
 });
