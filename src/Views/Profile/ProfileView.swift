@@ -128,23 +128,25 @@ struct ProfileView: View {
     // MARK: - Menu Section
     private var menuSection: some View {
         VStack(spacing: Design.Spacing.standard) {
-            MenuRow(icon: "clock.arrow.circlepath", title: "历史记录", color: Design.Colors.primary) {
-                // Navigate to history
+            NavigationLink(destination: HistoryView()) {
+                MenuRowContent(icon: "clock.arrow.circlepath", title: "历史记录", color: Design.Colors.primary)
             }
+            .buttonStyle(.plain)
 
-            MenuRow(icon: "heart.fill", title: "我的收藏", color: Design.Colors.accent) {
-                // Navigate to favorites
+            NavigationLink(destination: Text("收藏页面")) {
+                MenuRowContent(icon: "heart.fill", title: "我的收藏", color: Design.Colors.accent)
             }
+            .buttonStyle(.plain)
 
-            MenuRow(icon: "gearshape.fill", title: "设置", color: Design.Colors.secondaryText) {
+            MenuRowContent(icon: "gearshape.fill", title: "设置", color: Design.Colors.secondaryText) {
                 // Navigate to settings
             }
 
-            MenuRow(icon: "doc.text.fill", title: "关于", color: Design.Colors.secondaryText) {
+            MenuRowContent(icon: "doc.text.fill", title: "关于", color: Design.Colors.secondaryText) {
                 // Navigate to about
             }
 
-            MenuRow(icon: "hand.raised.fill", title: "隐私政策", color: Design.Colors.secondaryText) {
+            MenuRowContent(icon: "hand.raised.fill", title: "隐私政策", color: Design.Colors.secondaryText) {
                 // Navigate to privacy
             }
         }
@@ -152,37 +154,34 @@ struct ProfileView: View {
     }
 }
 
-// MARK: - Menu Row
-struct MenuRow: View {
+// MARK: - Menu Row Content
+struct MenuRowContent: View {
     let icon: String
     let title: String
     let color: Color
-    let action: () -> Void
+    var action: (() -> Void)? = nil
 
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: Design.Spacing.cardPadding) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundColor(color)
-                    .frame(width: 32)
+        HStack(spacing: Design.Spacing.cardPadding) {
+            Image(systemName: icon)
+                .font(.title3)
+                .foregroundColor(color)
+                .frame(width: 32)
 
-                Text(title)
-                    .font(.body)
-                    .foregroundColor(Design.Colors.primaryText)
+            Text(title)
+                .font(.body)
+                .foregroundColor(Design.Colors.primaryText)
 
-                Spacer()
+            Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundColor(Design.Colors.secondaryText)
-            }
-            .padding(Design.Spacing.cardPadding)
-            .background(
-                RoundedRectangle(cornerRadius: Design.CornerRadius.card)
-                    .fill(Color.white)
-            )
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundColor(Design.Colors.secondaryText)
         }
-        .buttonStyle(.plain)
+        .padding(Design.Spacing.cardPadding)
+        .background(
+            RoundedRectangle(cornerRadius: Design.CornerRadius.card)
+                .fill(Color.white)
+        )
     }
 }
