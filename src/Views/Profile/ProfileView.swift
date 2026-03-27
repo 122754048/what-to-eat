@@ -129,26 +129,52 @@ struct ProfileView: View {
     private var menuSection: some View {
         VStack(spacing: Design.Spacing.standard) {
             NavigationLink(destination: HistoryView()) {
-                MenuRowContent(icon: "clock.arrow.circlepath", title: "历史记录", color: Design.Colors.primary)
+                HStack(spacing: Design.Spacing.cardPadding) {
+                    Image(systemName: "clock.arrow.circlepath")
+                        .font(.title3)
+                        .foregroundColor(Design.Colors.primary)
+                        .frame(width: 32)
+                    Text("历史记录")
+                        .font(.body)
+                        .foregroundColor(Design.Colors.primaryText)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(Design.Colors.secondaryText)
+                }
+                .padding(Design.Spacing.cardPadding)
+                .background(
+                    RoundedRectangle(cornerRadius: Design.CornerRadius.card)
+                        .fill(Color.white)
+                )
             }
-            .buttonStyle(.plain)
 
-            NavigationLink(destination: Text("收藏页面")) {
-                MenuRowContent(icon: "heart.fill", title: "我的收藏", color: Design.Colors.accent)
+            NavigationLink(destination: Text("收藏页面（建设中）")) {
+                HStack(spacing: Design.Spacing.cardPadding) {
+                    Image(systemName: "heart.fill")
+                        .font(.title3)
+                        .foregroundColor(Design.Colors.accent)
+                        .frame(width: 32)
+                    Text("我的收藏")
+                        .font(.body)
+                        .foregroundColor(Design.Colors.primaryText)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundColor(Design.Colors.secondaryText)
+                }
+                .padding(Design.Spacing.cardPadding)
+                .background(
+                    RoundedRectangle(cornerRadius: Design.CornerRadius.card)
+                        .fill(Color.white)
+                )
             }
-            .buttonStyle(.plain)
 
-            MenuRowContent(icon: "gearshape.fill", title: "设置", color: Design.Colors.secondaryText) {
-                // Navigate to settings
-            }
+            MenuRowContent(icon: "gearshape.fill", title: "设置", color: Design.Colors.secondaryText)
 
-            MenuRowContent(icon: "doc.text.fill", title: "关于", color: Design.Colors.secondaryText) {
-                // Navigate to about
-            }
+            MenuRowContent(icon: "doc.text.fill", title: "关于", color: Design.Colors.secondaryText)
 
-            MenuRowContent(icon: "hand.raised.fill", title: "隐私政策", color: Design.Colors.secondaryText) {
-                // Navigate to privacy
-            }
+            MenuRowContent(icon: "hand.raised.fill", title: "隐私政策", color: Design.Colors.secondaryText)
         }
         .padding(.horizontal, Design.Spacing.screenPadding)
     }
