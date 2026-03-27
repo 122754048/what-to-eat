@@ -3,9 +3,10 @@ import SwiftUI
 // MARK: - Design Tokens
 enum Design {
     enum Colors {
-        static let primary = Color(hex: "#7CB97D")
-        static let accent = Color(hex: "#F4A261")
-        static let background = Color(hex: "#FFFFFF")
+<<<<<<< HEAD
+        static let primary = Color(hex: "#8B9A6D")       // 鼠尾草绿
+        static let accent = Color(hex: "#F4A261")      // 暖橙色
+        static let background = Color(hex: "#FFFFFF")   // 纯白背景
         static let cardBackground = Color(hex: "#F8F8F8")
         static let primaryText = Color(hex: "#2D2D2D")
         static let secondaryText = Color(hex: "#8E8E93")
