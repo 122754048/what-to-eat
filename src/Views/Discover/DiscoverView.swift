@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import SwiftUI
 
 struct DiscoverView: View {
@@ -116,7 +115,6 @@ struct DiscoverCuisineCard: View {
     DiscoverView()
 }
 ||||||| merged common ancestors
-=======
 import SwiftUI
 
 struct DiscoverView: View {
@@ -449,4 +447,3 @@ struct DiscoverCardV: View {
         .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
     }
 }
->>>>>>> feat: add DiscoverView, ProfileView, HistoryView; set useMock=true for demo
