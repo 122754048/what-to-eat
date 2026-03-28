@@ -3,12 +3,12 @@ import Foundation
 // MARK: - API Configuration
 enum APIConfig {
     // Set to true to use mock data (for demo without backend)
-    static let useMock = true
+    static let useMock = false
 
     #if DEBUG
-    static let baseURL = "http://localhost:3000/api/v1"
+    static let baseURL = "https://passionate-rejoicing-production.up.railway.app/api/v1"
     #else
-    static let baseURL = "https://what-to-eat.{account}.workers.dev/api/v1"
+    static let baseURL = "https://passionate-rejoicing-production.up.railway.app/api/v1"
     #endif
 
     static let userIDKey = "device_uuid"
