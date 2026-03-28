@@ -7,7 +7,7 @@ struct FavoritesPage: View {
             
             Image(systemName: "heart.fill")
                 .font(.system(size: 64))
-                .foregroundColor(Color(hex: "#8B9A6D").opacity(0.3))
+                .foregroundColor(Design.Colors.primary.opacity(0.3))
             
             Text("还没有收藏")
                 .font(.title2)

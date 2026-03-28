@@ -13,7 +13,7 @@ struct MyProfilePage: View {
                         .overlay(
                             Image(systemName: "person.fill")
                                 .font(.system(size: 36))
-                                .foregroundColor(Color(hex: "#8B9A6D"))
+                                .foregroundColor(Design.Colors.primary)
                         )
                     
                     Text("小明")
@@ -27,10 +27,10 @@ struct MyProfilePage: View {
                         Text("Premium会员")
                             .font(.caption)
                     }
-                    .foregroundColor(Color(hex: "#8B9A6D"))
+                    .foregroundColor(Design.Colors.primary)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Color(hex: "#8B9A6D").opacity(0.15))
+                    .background(Design.Colors.primary.opacity(0.15))
                     .cornerRadius(20)
                 }
                 .padding(.top, 24)
@@ -56,7 +56,7 @@ struct MyProfilePage: View {
                                 .foregroundColor(.white)
                                 .padding(.horizontal, 16)
                                 .padding(.vertical, 8)
-                                .background(Color(hex: "#8B9A6D"))
+                                .background(Design.Colors.primary)
                                 .cornerRadius(20)
                         }
                     }
@@ -64,7 +64,7 @@ struct MyProfilePage: View {
                 .padding(20)
                 .background(
                     LinearGradient(
-                        colors: [Color(hex: "#8B9A6D"), Color(hex: "#A8B88A")],
+                        colors: [Design.Colors.primary, Color(hex: "#A8B88A")],
                         startPoint: .topLeading,
                         endPoint: .bottomTrailing
                     )
@@ -81,7 +81,7 @@ struct MyProfilePage: View {
                     Divider().padding(.leading, 56)
                     MenuRow(icon: "gearshape.fill", iconColor: Color(hex: "#86868B"), title: "设置")
                     Divider().padding(.leading, 56)
-                    MenuRow(icon: "questionmark.circle.fill", iconColor: Color(hex: "#8B9A6D"), title: "帮助与反馈")
+                    MenuRow(icon: "questionmark.circle.fill", iconColor: Design.Colors.primary, title: "帮助与反馈")
                 }
                 .background(Color.white)
                 .cornerRadius(16)

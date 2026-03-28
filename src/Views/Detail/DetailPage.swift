@@ -67,12 +67,12 @@ struct DetailPage: View {
                         if let calories = dish.calories {
                             Text("\(calories.min)-\(calories.max) \(calories.unit)")
                                 .font(.subheadline)
-                                .foregroundColor(Color(hex: "#8B9A6D"))
+                                .foregroundColor(Design.Colors.primary)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 4)
                                 .background(
                                     Capsule()
-                                        .fill(Color(hex: "#8B9A6D").opacity(0.15))
+                                        .fill(Design.Colors.primary.opacity(0.15))
                                 )
                         }
                     }
@@ -224,7 +224,7 @@ struct DetailPage: View {
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color(hex: "#8B9A6D"))
+                        .background(Design.Colors.primary)
                         .cornerRadius(12)
                 }
             }

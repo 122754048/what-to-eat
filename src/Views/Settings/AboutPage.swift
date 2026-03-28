@@ -8,7 +8,7 @@ struct AboutPage: View {
                 VStack(spacing: 16) {
                     Image(systemName: "fork.knife.circle.fill")
                         .font(.system(size: 80))
-                        .foregroundColor(Color(hex: "#8B9A6D"))
+                        .foregroundColor(Design.Colors.primary)
                     
                     Text("吃什么")
                         .font(.largeTitle)

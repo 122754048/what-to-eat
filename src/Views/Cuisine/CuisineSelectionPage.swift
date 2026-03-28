@@ -113,7 +113,7 @@ struct CuisineCard: View {
                     .fill(Color.white)
                     .overlay(
                         RoundedRectangle(cornerRadius: 20)
-                            .stroke(isSelected ? Color(hex: "#8B9A6D") : Color.clear, lineWidth: 2)
+                            .stroke(isSelected ? Design.Colors.primary : Color.clear, lineWidth: 2)
                     )
             )
             .shadow(color: .black.opacity(0.06), radius: 8, y: 2)
