@@ -35,7 +35,7 @@ struct DetailPage: View {
                             .aspectRatio(contentMode: .fill)
                     default:
                         Rectangle()
-                            .fill(Color(hex: "#F5F5F7"))
+                            .fill(Design.Colors.cardBackground)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -53,7 +53,7 @@ struct DetailPage: View {
                         Text(dish.name)
                             .font(.title)
                             .fontWeight(.bold)
-                            .foregroundColor(Color(hex: "#1A1A1A"))
+                            .foregroundColor(Design.Colors.primaryText)
 
                         Spacer()
                     }
@@ -62,7 +62,7 @@ struct DetailPage: View {
                     HStack(spacing: 12) {
                         Text(dish.cuisineName)
                             .font(.subheadline)
-                            .foregroundColor(Color(hex: "#86868B"))
+                            .foregroundColor(Design.Colors.secondaryText)
 
                         if let calories = dish.calories {
                             Text("\(calories.min)-\(calories.max) \(calories.unit)")
@@ -82,10 +82,10 @@ struct DetailPage: View {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Image(systemName: "sparkles")
-                                    .foregroundColor(Color(hex: "#F4A261"))
+                                    .foregroundColor(Design.Colors.accent)
                                 Text("小 AI 推荐")
                                     .font(.headline)
-                                    .foregroundColor(Color(hex: "#1A1A1A"))
+                                    .foregroundColor(Design.Colors.primaryText)
                             }
 
                             Text(recommendation)
@@ -96,7 +96,7 @@ struct DetailPage: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(
                             RoundedRectangle(cornerRadius: 16)
-                                .fill(Color(hex: "#F4A261").opacity(0.1))
+                                .fill(Design.Colors.accent.opacity(0.1))
                         )
                     }
 
@@ -107,12 +107,12 @@ struct DetailPage: View {
                                 ForEach(dish.tags, id: \.self) { tag in
                                     Text(tag)
                                         .font(.caption)
-                                        .foregroundColor(Color(hex: "#1A1A1A"))
+                                        .foregroundColor(Design.Colors.primaryText)
                                         .padding(.horizontal, 12)
                                         .padding(.vertical, 6)
                                         .background(
                                             Capsule()
-                                                .fill(Color(hex: "#F5F5F7"))
+                                                .fill(Design.Colors.cardBackground)
                                         )
                                 }
                             }
@@ -124,7 +124,7 @@ struct DetailPage: View {
                         HStack {
                             Label(difficulty, systemImage: "chart.bar.fill")
                                 .font(.caption)
-                                .foregroundColor(Color(hex: "#86868B"))
+                                .foregroundColor(Design.Colors.secondaryText)
                             Spacer()
                         }
                     }
@@ -133,7 +133,7 @@ struct DetailPage: View {
                         HStack {
                             Label(cookTime, systemImage: "clock.fill")
                                 .font(.caption)
-                                .foregroundColor(Color(hex: "#86868B"))
+                                .foregroundColor(Design.Colors.secondaryText)
                             Spacer()
                         }
                     }
@@ -144,7 +144,7 @@ struct DetailPage: View {
                     if !relatedDishes.isEmpty {
                         Text("你可能也喜欢")
                             .font(.headline)
-                            .foregroundColor(Color(hex: "#1A1A1A"))
+                            .foregroundColor(Design.Colors.primaryText)
 
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
@@ -158,7 +158,7 @@ struct DetailPage: View {
                                                     .aspectRatio(contentMode: .fill)
                                             default:
                                                 Rectangle()
-                                                    .fill(Color(hex: "#F5F5F7"))
+                                                    .fill(Design.Colors.cardBackground)
                                             }
                                         }
                                         .frame(width: 120, height: 90)
@@ -166,13 +166,13 @@ struct DetailPage: View {
 
                                         Text(related.name)
                                             .font(.caption)
-                                            .foregroundColor(Color(hex: "#1A1A1A"))
+                                            .foregroundColor(Design.Colors.primaryText)
                                             .lineLimit(1)
 
                                         if let cal = related.calories {
                                             Text("\(cal.min) kcal")
                                                 .font(.caption2)
-                                                .foregroundColor(Color(hex: "#86868B"))
+                                                .foregroundColor(Design.Colors.secondaryText)
                                         }
                                     }
                                     .frame(width: 120)
@@ -192,7 +192,7 @@ struct DetailPage: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.body)
-                    .foregroundColor(Color(hex: "#1A1A1A"))
+                    .foregroundColor(Design.Colors.primaryText)
                     .padding(12)
                     .background(Color.white.opacity(0.9))
                     .clipShape(Circle())
@@ -208,10 +208,10 @@ struct DetailPage: View {
                     Text("再来一次")
                         .font(.body)
                         .fontWeight(.semibold)
-                        .foregroundColor(Color(hex: "#1A1A1A"))
+                        .foregroundColor(Design.Colors.primaryText)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                        .background(Color(hex: "#F5F5F7"))
+                        .background(Design.Colors.cardBackground)
                         .cornerRadius(12)
                 }
 

@@ -7,16 +7,16 @@ struct MembershipPage: View {
             VStack(spacing: 16) {
                 Image(systemName: "crown.fill")
                     .font(.system(size: 64))
-                    .foregroundColor(Color(hex: "#8B9A6D"))
+                    .foregroundColor(Design.Colors.primary)
                 
                 Text("升级 Premium")
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .foregroundColor(Color(hex: "#1A1A1A"))
+                    .foregroundColor(Design.Colors.primaryText)
                 
                 Text("解锁无限探索，告别选择困难")
                     .font(.subheadline)
-                    .foregroundColor(Color(hex: "#86868B"))
+                    .foregroundColor(Design.Colors.secondaryText)
             }
             .padding(.top, 60)
             .padding(.bottom, 32)
@@ -30,10 +30,10 @@ struct MembershipPage: View {
                                 Text("Pro")
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(Color(hex: "#1A1A1A"))
+                                    .foregroundColor(Design.Colors.primaryText)
                                 Text("$9.9/月 或 $79/年")
                                     .font(.caption)
-                                    .foregroundColor(Color(hex: "#86868B"))
+                                    .foregroundColor(Design.Colors.secondaryText)
                             }
                             Spacer()
                         }
@@ -54,7 +54,7 @@ struct MembershipPage: View {
                                 .foregroundColor(.white)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(Color(hex: "#8B9A6D"))
+                                .background(Design.Colors.primary)
                                 .cornerRadius(12)
                         }
                     }
@@ -70,10 +70,10 @@ struct MembershipPage: View {
                                 Text("Family")
                                     .font(.title2)
                                     .fontWeight(.bold)
-                                    .foregroundColor(Color(hex: "#1A1A1A"))
+                                    .foregroundColor(Design.Colors.primaryText)
                                 Text("$19.9/月 或 $159/年")
                                     .font(.caption)
-                                    .foregroundColor(Color(hex: "#86868B"))
+                                    .foregroundColor(Design.Colors.secondaryText)
                             }
                             Spacer()
                         }
@@ -89,10 +89,10 @@ struct MembershipPage: View {
                             Text("选择 Family")
                                 .font(.body)
                                 .fontWeight(.semibold)
-                                .foregroundColor(Color(hex: "#8B9A6D"))
+                                .foregroundColor(Design.Colors.primary)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .background(Color(hex: "#F5F5F7"))
+                                .background(Design.Colors.cardBackground)
                                 .cornerRadius(12)
                         }
                     }
@@ -111,10 +111,10 @@ struct MembershipPage: View {
                 Text("支持 7 天无理由退款")
                     .font(.caption)
             }
-            .foregroundColor(Color(hex: "#86868B"))
+            .foregroundColor(Design.Colors.secondaryText)
             .padding(.vertical, 24)
         }
-        .background(Color(hex: "#F5F5F7"))
+        .background(Design.Colors.cardBackground)
     }
 }
 
@@ -125,11 +125,11 @@ struct FeatureRow: View {
     var body: some View {
         HStack(spacing: 12) {
             Image(systemName: icon)
-                .foregroundColor(Color(hex: "#8B9A6D"))
+                .foregroundColor(Design.Colors.primary)
                 .font(.caption)
             Text(text)
                 .font(.body)
-                .foregroundColor(Color(hex: "#1A1A1A"))
+                .foregroundColor(Design.Colors.primaryText)
         }
     }
 }

@@ -20,7 +20,7 @@ struct HistoryPage: View {
                 
                 Image(systemName: "clock.fill")
                     .font(.system(size: 64))
-                    .foregroundColor(Color(hex: "#8B9A6D").opacity(0.3))
+                    .foregroundColor(Design.Colors.primary.opacity(0.3))
                 
                 Text("暂无历史记录")
                     .font(.title2)
