@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>历史记录 - 吃什么</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif; background: #FFFFFF; max-width: 430px; margin: 0 auto; min-height: 100vh; padding-bottom: 100px; color: #1A1A1A; }
+        .header { padding: 16px 24px; }
+        .page-title { font-size: 34px; font-weight: 700; letter-spacing: -0.5px; }
+        .date-group { padding: 16px 24px; }
+        .date-label { font-size: 13px; color: #86868B; margin-bottom: 12px; }
+        .history-card { background: #FFFFFF; border-radius: 16px; padding: 14px; display: flex; gap: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        .history-card img { width: 70px; height: 70px; border-radius: 12px; object-fit: cover; }
+        .history-card .info { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .history-card .name { font-size: 16px; font-weight: 500; color: #1A1A1A; margin-bottom: 4px; }
+        .history-card .meta { font-size: 13px; color: #86868B; margin-bottom: 8px; }
+        .history-card .action { font-size: 12px; color: #8B9A6D; }
+        .tab-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; height: 83px; background: rgba(255,255,255,0.92); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 0.5px solid rgba(0,0,0,0.08); display: flex; justify-content: space-around; padding-top: 12px; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #86868B; font-size: 10px; font-weight: 500; }
+        .tab-item.active { color: #8B9A6D; }
+    </style>
+</head>
+<body>
+    <div class="header"><h1 class="page-title">历史记录</h1></div>
+    <div class="date-group">
+        <div class="date-label">今天</div>
+        <div class="history-card">
+            <img src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=200" alt="">
+            <div class="info"><div class="name">凯撒沙拉</div><div class="meta">12:30 · 350 kcal</div><div class="action">再次查看 ›</div></div>
+        </div>
+        <div class="history-card">
+            <img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=200" alt="">
+            <div class="info"><div class="name">日式煎饼</div><div class="meta">19:45 · 420 kcal</div><div class="action">再次查看 ›</div></div>
+        </div>
+    </div>
+    <div class="date-group">
+        <div class="date-label">昨天</div>
+        <div class="history-card">
+            <img src="https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200" alt="">
+            <div class="info"><div class="name">牛油果沙拉</div><div class="meta">13:20 · 320 kcal</div><div class="action">再次查看 ›</div></div>
+        </div>
+    </div>
+    <div class="tab-bar">
+        <div class="tab-item"><span>🏠</span><span>首页</span></div>
+        <div class="tab-item"><span>🔍</span><span>发现</span></div>
+        <div class="tab-item"><span>🍜</span><span>菜系</span></div>
+        <div class="tab-item"><span>❤️</span><span>收藏</span></div>
+        <div class="tab-item active"><span>👤</span><span>我的</span></div>
+    </div>
+</body>
+</html>

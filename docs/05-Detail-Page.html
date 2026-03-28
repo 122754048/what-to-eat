@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>详情 - 吃什么</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif; background: #FFFFFF; max-width: 430px; margin: 0 auto; min-height: 100vh; padding-bottom: 100px; color: #1A1A1A; }
+        .hero-image { width: 100%; height: 320px; object-fit: cover; }
+        .content { padding: 24px; }
+        .header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+        .title { font-size: 28px; font-weight: 700; letter-spacing: -0.3px; line-height: 1.2; }
+        .rating { display: flex; gap: 2px; color: #F4A261; font-size: 14px; }
+        .location { font-size: 15px; color: #86868B; margin-bottom: 20px; }
+        .section { margin-bottom: 32px; }
+        .section-title { font-size: 13px; color: #86868B; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+        .reason-text { font-size: 17px; line-height: 1.6; color: #1A1A1A; }
+        .calorie-row { display: flex; align-items: center; gap: 16px; }
+        .calorie-value { font-size: 24px; font-weight: 600; color: #1A1A1A; }
+        .calorie-unit { font-size: 15px; color: #86868B; }
+        .tags { display: flex; gap: 8px; flex-wrap: wrap; }
+        .tag { font-size: 13px; color: #8B9A6D; background: rgba(139,154,109,0.1); padding: 8px 16px; border-radius: 20px; }
+        .horizontal-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 8px; margin: 0 -24px; padding-left: 24px; padding-right: 24px; -webkit-overflow-scrolling: touch; }
+        .horizontal-scroll::-webkit-scrollbar { display: none; }
+        .mini-card { min-width: 120px; flex-shrink: 0; }
+        .mini-card img { width: 120px; height: 90px; object-fit: cover; border-radius: 12px; margin-bottom: 8px; }
+        .mini-card .name { font-size: 14px; font-weight: 500; color: #1A1A1A; }
+        .mini-card .meta { font-size: 12px; color: #86868B; margin-top: 2px; }
+        .divider { height: 1px; background: #F5F5F7; margin: 32px 0; }
+        .action-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 16px 24px 34px; background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 0.5px solid rgba(0,0,0,0.08); display: flex; gap: 12px; }
+        .btn { flex: 1; padding: 16px; border-radius: 12px; font-size: 17px; font-weight: 600; border: none; cursor: pointer; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary { background: #F5F5F7; color: #1A1A1A; }
+        .btn-primary { background: #F4A261; color: white; }
+    </style>
+</head>
+<body>
+    <img class="hero-image" src="https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&q=90" alt="沙拉">
+    <div class="content">
+        <div class="header-row"><h1 class="title">凯撒沙拉</h1><div class="rating">★★★★★</div></div>
+        <p class="location">轻食主义 · 经典选择</p>
+        <div class="section"><div class="section-title">推荐理由</div><p class="reason-text">这道沙拉富含膳食纤维和优质蛋白质，搭配清爽的酱汁，非常适合想要保持健康饮食的你。</p></div>
+        <div class="section"><div class="section-title">热量</div><div class="calorie-row"><span class="calorie-value">350</span><span class="calorie-unit">kcal</span></div></div>
+        <div class="section"><div class="section-title">标签</div><div class="tags"><span class="tag">高蛋白</span><span class="tag">低卡路里</span><span class="tag">高纤维</span></div></div>
+        <div class="divider"></div>
+        <div class="section"><div class="section-title">配菜推荐</div>
+            <div class="horizontal-scroll">
+                <div class="mini-card"><img src="https://images.unsplash.com/photo-1567620905732-2d1ec7ab7445?w=300" alt=""><div class="name">日式煎饼</div><div class="meta">420 kcal</div></div>
+                <div class="mini-card"><img src="https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=300" alt=""><div class="name">水果沙拉</div><div class="meta">180 kcal</div></div>
+            </div>
+        </div>
+        <div class="section"><div class="section-title">饮品推荐</div>
+            <div class="horizontal-scroll">
+                <div class="mini-card"><img src="https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300" alt=""><div class="name">鲜榨橙汁</div><div class="meta">120 kcal</div></div>
+                <div class="mini-card"><img src="https://images.unsplash.com/photo-1534353473418-4cfa6c56fd38?w=300" alt=""><div class="name">绿茶</div><div class="meta">5 kcal</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="action-bar"><button class="btn btn-secondary">再来一次</button><button class="btn btn-primary">去吃！</button></div>
+</body>
+</html>
