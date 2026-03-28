@@ -96,9 +96,34 @@ struct Recipe: Codable {
 
 struct HistoryItem: Identifiable, Codable {
     let id: String
-    let dish: Dish
+    let dishId: String
+    let dishName: String
+    let cuisineName: String
     let liked: Int?
-    let createdAt: String
+    let recommendedAt: Int?
+
+    var createdAt: Date {
+        if let ts = recommendedAt {
+            return Date(timeIntervalSince1970: TimeInterval(ts) / 1000)
+        }
+        return Date()
+    }
+
+    var dish: Dish {
+        Dish(
+            id: dishId,
+            name: dishName,
+            cuisineId: "",
+            cuisineName: cuisineName,
+            imageUrl: nil,
+            thumbnailUrl: nil,
+            calories: nil,
+            aiRecommendation: nil,
+            tags: [],
+            difficulty: nil,
+            cookTime: nil
+        )
+    }
 }
 
 struct PagedHistory: Codable {
@@ -106,7 +131,6 @@ struct PagedHistory: Codable {
     let page: Int
     let pageSize: Int
     let total: Int
-    let hasMore: Bool
 }
 
 // MARK: - Device UUID
@@ -207,7 +231,7 @@ class APIService {
         let body: [String: Any] = ["excludePrevious": excludePrevious]
         let response: Response = try await request(
             method: "POST",
-            endpoint: "/recommend/cuisines/\(cuisineId)/recommend",
+            endpoint: "/cuisines/\(cuisineId)/recommend",
             body: body
         )
         return response.dish
