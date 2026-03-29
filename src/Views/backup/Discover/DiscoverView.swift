@@ -158,7 +158,7 @@ struct DiscoverView: View {
                     .padding(.bottom, 100)
                 }
             }
-            .navigationTitle("Discover")
+            .navigationTitle("发现")
             .onAppear {
                 loadData()
             }

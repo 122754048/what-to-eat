@@ -2,9 +2,15 @@
  * AI菜品生成服务
  * @module services/ai-dish.service
  *
- * V2.0 Phase 1：Mock优先，支持 mealContext + allergies
+ * V2.0 Phase 2：优先 Cloudflare AI REST API，fallback Mock
  * 响应格式：{ name, reason, calories, pairings, imageUrl }
  */
+import {
+  isCloudflareAIConfigured,
+  getCloudflareAIConfig,
+  callCloudflareAI,
+  AIMessage,
+} from '../utils/cloudflare-ai';
 export interface GenerateDishInput {
   cuisineId: string;
   mealContext?: string;      // 餐食场景：早餐/午餐/晚餐/夜宵
@@ -345,11 +351,68 @@ function selectByMood(dishes: GeneratedDish[], mood?: string): GeneratedDish[] {
 
 /**
  * 生成AI菜品
- * V2.0 Phase 1：Mock数据，支持 mealContext + allergies
+ * V2.0 Phase 2：优先调用 Cloudflare AI，fallback 到 Mock
  */
 export async function generateDish(input: GenerateDishInput): Promise<GeneratedDish> {
   const { cuisineId, mealContext, allergies = [] } = input;
 
+  // 尝试调用 Cloudflare AI
+  if (isCloudflareAIConfigured()) {
+    try {
+      const config = getCloudflareAIConfig();
+      const cuisineName = CUISINE_NAMES[cuisineId] ?? '创意菜';
+
+      const allergyText = allergies.length > 0 ? `（忌口：${allergies.join('、')}）` : '';
+      const contextText = mealContext ? `场景：${mealContext}` : '';
+
+      const messages: AIMessage[] = [
+        {
+          role: 'user',
+          content: `你是美食推荐助手。请根据以下信息推荐一道菜：
+
+菜系：${cuisineName}
+${contextText}
+${allergyText}
+
+请用 JSON 格式返回推荐结果，格式如下：
+{
+  "name": "菜名",
+  "reason": "推荐理由（20字以内）",
+  "calories": "热量范围，如 300-400",
+  "pairings": {
+    "dishes": ["配菜1", "配菜2"],
+    "drinks": ["饮品1", "饮品2"]
+  },
+  "imageUrl": "食物图片URL（来自Unsplash）"
+}
+
+注意：只返回 JSON，不要其他文字。`,
+        },
+      ];
+
+      const rawResponse = await callCloudflareAI(config, '@cf/meta/llama-4-scout-b', messages);
+
+      // 解析 JSON 响应
+      const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        return {
+          name: parsed.name,
+          reason: parsed.reason,
+          calories: parsed.calories,
+          pairings: {
+            dishes: parsed.pairings?.dishes ?? [],
+            drinks: parsed.pairings?.drinks ?? [],
+          },
+          imageUrl: parsed.imageUrl ?? '',
+        };
+      }
+    } catch (err) {
+      console.warn('[AI Dish] Cloudflare AI 调用失败，使用 Mock fallback:', err);
+    }
+  }
+
+  // ========== Mock fallback ==========
   // 获取菜系菜品库
   let dishes = MOCK_DISHES[cuisineId] ?? DEFAULT_DISHES;
 

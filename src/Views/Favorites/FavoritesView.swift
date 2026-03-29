@@ -21,7 +21,7 @@ struct FavoritesView: View {
                     .padding(.bottom, 100)
                 }
             }
-            .navigationTitle("收藏")
+            .navigationTitle("Favorites")
             .navigationBarTitleDisplayMode(.large)
         }
     }

@@ -134,7 +134,7 @@ struct ProfileView: View {
                         .font(.title3)
                         .foregroundColor(Design.Colors.primary)
                         .frame(width: 32)
-                    Text("History")
+                    Text("历史记录")
                         .font(.body)
                         .foregroundColor(Design.Colors.primaryText)
                     Spacer()
@@ -149,13 +149,13 @@ struct ProfileView: View {
                 )
             }
 
-            NavigationLink(destination: Text("Coming Soon")) {
+            NavigationLink(destination: Text("收藏页面（建设中）")) {
                 HStack(spacing: Design.Spacing.cardPadding) {
                     Image(systemName: "heart.fill")
                         .font(.title3)
                         .foregroundColor(Design.Colors.accent)
                         .frame(width: 32)
-                    Text("My Favorites")
+                    Text("我的收藏")
                         .font(.body)
                         .foregroundColor(Design.Colors.primaryText)
                     Spacer()

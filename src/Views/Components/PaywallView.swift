@@ -257,7 +257,7 @@ struct PlanCard: View {
 
             // Button
             Button(action: onPurchase) {
-                Text("立即订阅")
+                Text("Subscribe Now")
                     .font(.body)
                     .fontWeight(.semibold)
                     .foregroundColor(.white)

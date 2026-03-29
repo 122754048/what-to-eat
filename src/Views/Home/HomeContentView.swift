@@ -43,7 +43,7 @@ struct HomeContentView: View {
     // MARK: - Featured Section
     private var featuredSection: some View {
         VStack(alignment: .leading, spacing: Design.Spacing.standard) {
-            sectionHeader(title: "精选推荐", icon: "star.fill", color: Design.Colors.accent)
+            sectionHeader(title: "Featured", icon: "star.fill", color: Design.Colors.accent)
 
             TabView {
                 ForEach(featuredDishes) { dish in
@@ -58,7 +58,7 @@ struct HomeContentView: View {
     // MARK: - Cuisine Grid Section
     private var cuisineGridSection: some View {
         VStack(alignment: .leading, spacing: Design.Spacing.standard) {
-            sectionHeader(title: "探索菜系", icon: "fork.knife", color: Design.Colors.primary)
+            sectionHeader(title: "Explore Cuisines", icon: "fork.knife", color: Design.Colors.primary)
 
             LazyVGrid(columns: columns, spacing: Design.Spacing.cardMargin) {
                 ForEach(cuisines.prefix(8)) { cuisine in
@@ -73,12 +73,12 @@ struct HomeContentView: View {
     // MARK: - Quick Actions Section
     private var quickActionsSection: some View {
         VStack(alignment: .leading, spacing: Design.Spacing.standard) {
-            sectionHeader(title: "快捷入口", icon: "bolt.fill", color: Design.Colors.accent)
+            sectionHeader(title: "Quick Access", icon: "bolt.fill", color: Design.Colors.accent)
 
             HStack(spacing: Design.Spacing.cardMargin) {
                 QuickActionButton(
                     icon: "flame.fill",
-                    title: "随机一道",
+                    title: "Random Dish",
                     color: Design.Colors.accent
                 ) {
                     // Trigger random recommendation
@@ -86,7 +86,7 @@ struct HomeContentView: View {
 
                 QuickActionButton(
                     icon: "heart.fill",
-                    title: "我的收藏",
+                    title: "My Favorites",
                     color: .red
                 ) {
                     // Navigate to favorites
@@ -94,7 +94,7 @@ struct HomeContentView: View {
 
                 QuickActionButton(
                     icon: "clock.fill",
-                    title: "历史记录",
+                    title: "History",
                     color: Design.Colors.primary
                 ) {
                     // Navigate to history

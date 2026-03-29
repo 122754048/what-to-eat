@@ -75,9 +75,9 @@ struct MyProfilePage: View {
                 
                 // Menu List
                 VStack(spacing: 0) {
-                    MenuRow(icon: "heart.fill", iconColor: Color(hex: "#FF6B6B"), title: "我的收藏")
+                    MenuRow(icon: "heart.fill", iconColor: Color(hex: "#FF6B6B"), title: "My Favorites")
                     Divider().padding(.leading, 56)
-                    MenuRow(icon: "clock.fill", iconColor: Color(hex: "#4ECDC4"), title: "历史记录")
+                    MenuRow(icon: "clock.fill", iconColor: Color(hex: "#4ECDC4"), title: "History")
                     Divider().padding(.leading, 56)
                     MenuRow(icon: "gearshape.fill", iconColor: Color(hex: "#86868B"), title: "设置")
                     Divider().padding(.leading, 56)

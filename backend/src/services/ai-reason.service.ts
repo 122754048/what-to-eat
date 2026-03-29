@@ -2,8 +2,15 @@
  * AI推荐理由生成服务
  * @module services/ai-reason.service
  *
- * V2.0 Phase 1：Mock模板引擎
+ * V2.0 Phase 2：优先 Cloudflare AI REST API，fallback Mock
  */
+import {
+  isCloudflareAIConfigured,
+  getCloudflareAIConfig,
+  callCloudflareAI,
+  AIMessage,
+} from '../utils/cloudflare-ai';
+
 export interface GenerateReasonInput {
   dishName: string;
   cuisineName?: string;
@@ -31,11 +38,34 @@ const FEATURES = [
 ];
 
 /**
- * 生成推荐理由（Mock版）
+ * 生成推荐理由
+ * 优先调用 Cloudflare AI，fallback Mock
  */
 export async function generateReason(input: GenerateReasonInput): Promise<string> {
   const { dishName, cuisineName = '这道菜' } = input;
 
+  // 尝试调用 Cloudflare AI
+  if (isCloudflareAIConfigured()) {
+    try {
+      const config = getCloudflareAIConfig();
+      const messages: AIMessage[] = [
+        {
+          role: 'user',
+          content: `你是一个美食推荐助手。请为"${dishName}"（${cuisineName}）生成一句简短的推荐理由，不超过20个字，要生动诱人。只需返回推荐理由，不要其他文字。`,
+        },
+      ];
+
+      const response = await callCloudflareAI(config, '@cf/meta/llama-4-scout-b', messages);
+      const reason = response.trim();
+      if (reason.length > 0 && reason.length <= 50) {
+        return reason;
+      }
+    } catch (err) {
+      console.warn('[AI Reason] Cloudflare AI 调用失败，使用 Mock fallback:', err);
+    }
+  }
+
+  // ========== Mock fallback ==========
   const template = REASON_TEMPLATES[Math.floor(Math.random() * REASON_TEMPLATES.length)];
   const feature = FEATURES[Math.floor(Math.random() * FEATURES.length)];
 

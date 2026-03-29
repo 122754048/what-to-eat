@@ -72,15 +72,7 @@ struct HistoryView: View {
                     historyList
                 }
             }
-            .navigationTitle("History")
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {}) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                            .foregroundColor(Design.Colors.primary)
-                    }
-                }
-            }
+            .navigationTitle("历史记录")
         }
     }
 
@@ -90,12 +82,12 @@ struct HistoryView: View {
                 .font(.system(size: 60))
                 .foregroundColor(Design.Colors.secondaryText)
 
-            Text("No history yet")
+            Text("暂无历史记录")
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(Design.Colors.primaryText)
 
-            Text("Start swiping to discover dishes")
+            Text("快去滑动卡片探索美食吧")
                 .font(.body)
                 .foregroundColor(Design.Colors.secondaryText)
         }
@@ -167,7 +159,7 @@ struct HistoryRow: View {
     private var resultBadge: some View {
         switch entry.liked {
         case 1:
-            Label("Liked", systemImage: "heart.fill")
+            Label("喜欢", systemImage: "heart.fill")
                 .font(.caption)
                 .foregroundColor(.red)
                 .padding(.horizontal, 8)
@@ -177,7 +169,7 @@ struct HistoryRow: View {
                         .fill(Color.red.opacity(0.12))
                 )
         case -1:
-            Label("Passed", systemImage: "xmark")
+            Label("跳过", systemImage: "xmark")
                 .font(.caption)
                 .foregroundColor(Design.Colors.secondaryText)
                 .padding(.horizontal, 8)

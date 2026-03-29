@@ -1,11 +1,57 @@
+import SwiftUI
+
+// MARK: - Design Tokens
+enum Design {
+    enum Colors {
+        static let primary = Color(hex: "#8B9A6D")       // 鼠尾草绿
+        static let accent = Color(hex: "#F4A261")      // 暖橙色
+        static let background = Color(hex: "#FFFFFF")   // 纯白背景
+        static let cardBackground = Color(hex: "#F8F8F8")
+        static let primaryText = Color(hex: "#2D2D2D")
+        static let secondaryText = Color(hex: "#8E8E93")
+        static let border = Color(hex: "#E8E8E8")
+    }
+
+    enum Spacing {
+        static let screenPadding: CGFloat = 20
+        static let cardPadding: CGFloat = 16
+        static let cardMargin: CGFloat = 16
+        static let compact: CGFloat = 4
+        static let element: CGFloat = 8
+        static let standard: CGFloat = 12
+    }
+
+    enum CornerRadius {
+        static let card: CGFloat = 20
+        static let button: CGFloat = 12
+        static let tag: CGFloat = 10
+    }
+}
+
+// MARK: - Color Extension
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let a, r, g, b: UInt64
+        switch hex.count {
+        case 3: (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+        case 6: (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+        case 8: (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+        default: (a, r, g, b) = (255, 0, 0, 0)
+        }
+        self.init(.sRGB, red: Double(r)/255, green: Double(g)/255, blue: Double(b)/255, opacity: Double(a)/255)
+    }
+}
 
 // MARK: - Home View (Container)
 struct HomeView: View {
     @State private var selectedMode: HomeMode = .swipe
 
     enum HomeMode: String, CaseIterable {
-        case swipe = "Swipe"
-        case browse = "Browse"
+        case swipe = "滑动"
+        case browse = "浏览"
     }
 
     var body: some View {
@@ -163,7 +209,7 @@ struct SwipeCardContainer: View {
                 .fontWeight(.semibold)
                 .foregroundColor(Design.Colors.primaryText)
 
-            Text("See more dishes tomorrow")
+            Text("明天再来发现更多美食吧")
                 .font(.body)
                 .foregroundColor(Design.Colors.secondaryText)
 
