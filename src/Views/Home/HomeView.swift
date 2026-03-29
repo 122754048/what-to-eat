@@ -47,31 +47,13 @@ extension Color {
 
 // MARK: - Home View (Container)
 struct HomeView: View {
-    @State private var selectedMode: HomeMode = .swipe
-
-    enum HomeMode: String, CaseIterable {
-        case swipe = "滑动"
-        case browse = "浏览"
-    }
-
     var body: some View {
         NavigationStack {
             ZStack {
                 Design.Colors.background
                     .ignoresSafeArea()
 
-                VStack(spacing: 0) {
-                    // Mode Picker
-                    modePicker
-
-                    // Content
-                    switch selectedMode {
-                    case .swipe:
-                        SwipeCardContainer()
-                    case .browse:
-                        HomeContentView()
-                    }
-                }
+                SwipeCardContainer()
             }
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
@@ -81,34 +63,8 @@ struct HomeView: View {
                         .font(.headline)
                         .foregroundColor(Design.Colors.primaryText)
                 }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        showFilter = true
-                    } label: {
-                        Image(systemName: selectedFilters.isEmpty ? "line.3.horizontal.decrease.circle" : "line.3.horizontal.decrease.circle.fill")
-                            .foregroundColor(Design.Colors.primary)
-                    }
-                }
-            }
-            .sheet(isPresented: $showFilter) {
-                DietFilterSheet(selectedFilters: $selectedFilters) {
-                    // Apply filters - in production, would refetch dishes
-                }
             }
         }
-    }
-
-    private var modePicker: some View {
-        Picker("", selection: $selectedMode) {
-            ForEach(HomeMode.allCases, id: \.self) { mode in
-                Text(mode.rawValue)
-                    .tag(mode)
-            }
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, Design.Spacing.screenPadding)
-        .padding(.vertical, Design.Spacing.standard)
     }
 }
 
@@ -121,8 +77,6 @@ struct SwipeCardContainer: View {
     @State private var showAlert = false
     @State private var showDetail = false
     @State private var selectedDish: Dish?
-    @State private var showFilter = false
-    @State private var selectedFilters: Set<DietFilter> = []
     @State private var showPaywall = false
 
     var body: some View {
@@ -157,8 +111,6 @@ struct SwipeCardContainer: View {
             PaywallView()
         }
     }
-
-    // MARK: - Subviews
 
     private var loadingView: some View {
         VStack(spacing: Design.Spacing.cardMargin) {
@@ -292,8 +244,6 @@ struct SwipeCardContainer: View {
         .buttonStyle(ScaleButtonStyle())
     }
 
-    // MARK: - Computed
-
     private var visibleDishes: [Dish] {
         let endIndex = min(currentIndex + 3, dishes.count)
         guard currentIndex < endIndex else { return [] }
@@ -306,8 +256,6 @@ struct SwipeCardContainer: View {
         }
         return Double(visibleDishes.count - index)
     }
-
-    // MARK: - Actions
 
     private func loadDishes() {
         isLoading = true
@@ -353,18 +301,9 @@ struct SwipeCardContainer: View {
 
     private func swipeCurrentCard(direction: SwipeDirection) {
         guard currentIndex < dishes.count else { return }
-
-        // Check subscription swipe limit
-        if !SubscriptionManager.shared.checkSwipe() {
-            showPaywall = true
-            return
-        }
-
         let dish = dishes[currentIndex]
         handleSwipe(dish, direction: direction)
     }
-
-    // MARK: - Data Access
 
     private func fetchCuisines() async throws -> [Cuisine] {
         if APIConfig.useMock {
@@ -391,7 +330,7 @@ struct DishDetailSheet: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 0) {
+                VStack(alignment: .leading, spacing: Design.Spacing.cardMargin) {
                     // Hero Image
                     AsyncImage(url: dish.imageUrl) { phase in
                         switch phase {
@@ -408,13 +347,11 @@ struct DishDetailSheet: View {
                     .clipped()
 
                     VStack(alignment: .leading, spacing: Design.Spacing.cardMargin) {
-                        // Title
                         Text(dish.name)
                             .font(.title)
                             .fontWeight(.bold)
                             .foregroundColor(Design.Colors.primaryText)
 
-                        // Cuisine & Calories
                         HStack(spacing: Design.Spacing.standard) {
                             Label(dish.cuisineName, systemImage: "fork.knife")
                                 .font(.subheadline)
@@ -427,7 +364,6 @@ struct DishDetailSheet: View {
                             }
                         }
 
-                        // Recommendation
                         if let recommendation = dish.aiRecommendation {
                             Text(recommendation)
                                 .font(.body)
@@ -440,7 +376,6 @@ struct DishDetailSheet: View {
                                 )
                         }
 
-                        // Tags
                         if !dish.tags.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: Design.Spacing.element) {
@@ -458,15 +393,6 @@ struct DishDetailSheet: View {
                                 }
                             }
                         }
-
-                        // Meta Info
-                        if let difficulty = dish.difficulty {
-                            metaRow(icon: "chart.bar", label: "难度", value: difficulty)
-                        }
-
-                        if let cookTime = dish.cookTime {
-                            metaRow(icon: "clock", label: "烹饪时间", value: cookTime)
-                        }
                     }
                     .padding(Design.Spacing.screenPadding)
                 }
@@ -482,25 +408,6 @@ struct DishDetailSheet: View {
                 }
             }
         }
-    }
-
-    private func metaRow(icon: String, label: String, value: String) -> some View {
-        HStack {
-            Image(systemName: icon)
-                .foregroundColor(Design.Colors.secondaryText)
-                .frame(width: 24)
-
-            Text(label)
-                .font(.body)
-                .foregroundColor(Design.Colors.secondaryText)
-
-            Spacer()
-
-            Text(value)
-                .font(.body)
-                .foregroundColor(Design.Colors.primaryText)
-        }
-        .padding(.vertical, Design.Spacing.element)
     }
 }
 

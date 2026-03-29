@@ -58,6 +58,7 @@ struct OnboardingView: View {
                 }
                 .padding(.horizontal, Design.Spacing.screenPadding)
                 .padding(.bottom, Design.Spacing.cardMargin)
+            }
         }
     }
 }
@@ -140,7 +141,7 @@ struct OnboardingStep3: View {
     }
 }
 
-// 3-Tab 主导航界面
+// MARK: - ContentView (Main Tab Bar)
 struct ContentView: View {
     var body: some View {
         TabView {

@@ -197,9 +197,12 @@ class SubscriptionManager: ObservableObject {
 
         do {
             try await AppStore.sync()
-            for await entitlement in Transaction.currentEntitlements {
-                if let subscription = entitlement.subscriptionGroupID {
-                    await updateState(from: entitlement)
+            for await result in Transaction.currentEntitlements {
+                do {
+                    let transaction = try checkVerified(result)
+                    await updateState(from: transaction)
+                } catch {
+                    // Skip invalid transactions
                 }
             }
             isLoading = false
@@ -288,7 +291,7 @@ class SubscriptionManager: ObservableObject {
         saveState()
     }
 
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+    private nonisolated func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified:
             throw SubscriptionError.verificationFailed
