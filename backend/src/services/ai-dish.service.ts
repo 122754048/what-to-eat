@@ -390,7 +390,7 @@ ${allergyText}
         },
       ];
 
-      const rawResponse = await callCloudflareAI(config, '@cf/meta/llama-4-scout-b', messages);
+      const rawResponse = await callCloudflareAI(config, '@cf/meta/llama-3.1-8b-instruct', messages);
 
       // 解析 JSON 响应
       const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);

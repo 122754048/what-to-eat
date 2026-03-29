@@ -55,7 +55,7 @@ export async function generateReason(input: GenerateReasonInput): Promise<string
         },
       ];
 
-      const response = await callCloudflareAI(config, '@cf/meta/llama-4-scout-b', messages);
+      const response = await callCloudflareAI(config, '@cf/meta/llama-3.1-8b-instruct', messages);
       const reason = response.trim();
       if (reason.length > 0 && reason.length <= 50) {
         return reason;
