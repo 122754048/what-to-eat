@@ -38,7 +38,7 @@ export const aiRouter = new Hono();
  *   }
  * }
  */
-aiRouter.post('/ai/dish', async (c) => {
+aiRouter.post('/dish', async (c) => {
   const body = await c.req.json().catch(() => null);
 
   if (!body || typeof body.cuisineId !== 'string') {
@@ -77,7 +77,7 @@ aiRouter.post('/ai/dish', async (c) => {
  *   }
  * }
  */
-aiRouter.post('/ai/reason', async (c) => {
+aiRouter.post('/reason', async (c) => {
   const body = await c.req.json().catch(() => null);
 
   if (!body || typeof body.dishName !== 'string') {
