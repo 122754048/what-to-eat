@@ -104,7 +104,13 @@ struct HistoryItem: Identifiable, Codable {
 
     var createdAt: Date {
         if let ts = recommendedAt {
-            return Date(timeIntervalSince1970: TimeInterval(ts) / 1000)
+            // 后端时间戳来源不一致：
+            // - Mock/Firebase: 毫秒级（Date.now()）
+            // - PostgreSQL: 秒级（EXTRACT(EPOCH FROM NOW())）
+            // 这里做兼容，避免秒级时间被误当成毫秒导致显示为 1970 年。
+            let timestamp = TimeInterval(ts)
+            let seconds = timestamp > 10_000_000_000 ? (timestamp / 1000) : timestamp
+            return Date(timeIntervalSince1970: seconds)
         }
         return Date()
     }
